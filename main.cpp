@@ -2,7 +2,6 @@
 #include <string>
 #include <queue>
 #include <vector> 
-
 #include <sstream>
 
 using namespace std;
@@ -15,25 +14,44 @@ class Node {
         int depth; //depth of a node 
         int gn; 
         int hn;   
-    //Node* left;
-    //Node* right; 
+    
     public:
+        Node* child;
+        //Node* ; 
         int get_gn() { return this->gn; };
         int get_hn() { return this-> hn; };
+        int get_depth() { return this-> depth; };
     
     //vector<Node*>child; 
 };
 
 
 class Problem {
-    vector<int> goalState = {1, 2, 3, 4, 5, 6, 7, 8, 0};   //2D representation of the goalState 
+    private:
+        vector<int> inputPuzzle;
+
+    public:
+        vector<int> goalState = {1, 2, 3, 4, 5, 6, 7, 8, 0};   //2D representation of the goalState 
+        
+
+        //returns index for blank character
+        int getBlankIndex(Problem prob) {
+            int index;
+            for (int i = 0; i < inputPuzzle.size(); i++) {
+                if (inputPuzzle.at(i) == 0) {
+
+                }
+            }
+            return index; 
+            }
+        Problem(vector<int>* inputPuzzle); 
+
+
 
 
 };
 
 //class generalSearch (Problem prob) {}
-
-
 
 
 //main program
@@ -104,20 +122,21 @@ int main() {
 
    
     //Testing out 2d arrays, maybe could use this for mismatched heuristic 
+/*
     char goalState[3][3] = {{'1', '2', '3'},
                             {'4', '5', '6'},
                             {'7', '8', '0'}};
 
-/*
+
     char testPuzzle[3][3] = {{'2', '3', '4'},
                             {'1', '5', '6'},
                             {'7', '0', '8'}};    
-*/
+
     char testPuzzle[3][3] = {{'1', '2', '3'},
                             {'4', '5', '6'},
                             {'7', '0', '8'}}; 
 
-
+*/
     int mismatches = 0; 
     /*
     //can make the '3' just an n value
