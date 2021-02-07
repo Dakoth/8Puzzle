@@ -9,6 +9,9 @@ using namespace std;
 int numOfNodes = 0; //global variable to count number of nodes
 int maxNumInQueue = 0; //Max number of nodes in a queue. 
 
+//priority_queue<Problem, vector<Problem>, greater<Problem> > Min_Heap;
+
+
 class Node {
     private: 
         int depth; //depth of a node 
@@ -16,42 +19,97 @@ class Node {
         int hn;   
     
     public:
-        Node* child;
+        //Node* child;
         //Node* ; 
+        
+        //Methods
+        void set_gn(int gn_) { this->gn = gn_;};
         int get_gn() { return this->gn; };
+
+        void set_hn(int hn_) { this->hn = hn_;};
         int get_hn() { return this-> hn; };
+
+        void set_depth(int depth_) {this->depth = depth_;};
         int get_depth() { return this-> depth; };
     
-    //vector<Node*>child; 
+        //vector<Node*>child; 
+        //COnstructors
+        Node() { this->depth = 0; this->gn = 0; this->hn = 0; }; //default constructor
+        Node(int depth, int gn, int hn) {this->depth = depth; this->gn = gn; this->hn = hn; } //other constructor
 };
 
 
 class Problem {
     private:
-        vector<int> inputPuzzle;
+        Node* root = nullptr; //root pointer to root
+        //vector<int> inputPuzzle;
 
     public:
         vector<int> goalState = {1, 2, 3, 4, 5, 6, 7, 8, 0};   //2D representation of the goalState 
-        
+        vector<int> inputPuzzle;
+
+        //Methods
+        void setPuzzle(vector<int> puz) {this->inputPuzzle = puz;}; 
+
+
+        void moveUp(Problem& prob) {
+                return;
+        }
+
+        void moveDown(Problem& prob) {
+                return;
+        }
+
+        void moveLeft(Problem& prob) {
+                return;
+        }
+
+        void moveRight(Problem& prob) {
+                return;
+        }
+
+
 
         //returns index for blank character
-        int getBlankIndex(Problem prob) {
+        int getBlankIndex(Problem& prob) {
             int index;
-            for (int i = 0; i < inputPuzzle.size(); i++) {
-                if (inputPuzzle.at(i) == 0) {
-
+            for (int i = 0; i < prob.inputPuzzle.size(); i++) {
+                if (prob.inputPuzzle.at(i) == 0) {
+                    index = prob.inputPuzzle.at(i);
                 }
             }
             return index; 
-            }
-        Problem(vector<int>* inputPuzzle); 
+        }
 
 
 
-
+        //Constructors    
+        Problem(vector<int> inputPuzzle) { //NOT SURE IF THIS IS CORRECT FOR WHAT I WANNA DO
+            this->inputPuzzle = inputPuzzle;
+        }
+        Problem() {};
 };
 
-//class generalSearch (Problem prob) {}
+
+
+
+void generalSearch (Problem p) {
+
+return; 
+
+
+}
+
+
+
+//Helper function
+void printResults (Problem p) {
+    cout << endl;
+    cout << p.inputPuzzle.at(0) << " " << p.inputPuzzle.at(1) << " " << p.inputPuzzle.at(2) << endl;
+    cout << p.inputPuzzle.at(3) << " " << p.inputPuzzle.at(4) << " " << p.inputPuzzle.at(5) << endl;
+    cout << p.inputPuzzle.at(6) << " " << p.inputPuzzle.at(7) << " " << p.inputPuzzle.at(8) << endl;
+    return;
+}
 
 
 //main program
@@ -60,10 +118,16 @@ int main() {
     string userPuzzle = "";  
     string userPuzzleConcat = "";
     //int problem[9] = {}; //Initalize an empty problem 
-    vector<int> problem;
 
-    //int defaultProb[9] = {1, 2, 3, 4, 8, 0, 7, 6, 5};
+    vector<int> problem;
     vector<int> defaultProb = {1, 2, 3, 4, 8, 0, 7, 6, 5};
+
+
+    //testing out problem object
+    Problem prob;   //initalizes a problem 
+    //prob.setPuzzle(defaultProb);
+
+
 
     cout << "Hello and Welcome to Alfredo Gonzalez' 8-puzzle solver " << endl;
     cout << "Type \"1\" to use a default puzzle, or \"2\" to enter your own puzzle." << endl;
@@ -75,6 +139,7 @@ int main() {
 
         if (user == '1' ) { //default puzzle 
             problem = defaultProb;
+            //prob.setPuzzle(problem); //sets the inital problem puzzle to be the input
         }
         else if (user == '2') { //If not the default
             cout << "Enter your puzzle, use a zero to represent the blank" << endl;
@@ -108,10 +173,19 @@ int main() {
         }
     }   
 
-     //tests if the array was added 
+    //test
+    prob.setPuzzle(problem); //sets the inital problem puzzle to be the input
+    cout << "TEST PRINT OF PROBLEM" << endl;
+    printResults(prob);
+
+
+
+    //tests if the array was added 
+    /*
     for(int i = 0; i < problem.size(); i++){ 
          cout << problem.at(i) << " ";
     }
+    */
     //testing out queues 
     /*
     queue<int> testQ;
