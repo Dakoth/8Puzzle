@@ -3,5 +3,12 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"files.associations": {
+			"vector": "cpp",
+			"string": "cpp",
+			"iostream": "cpp"
+		}
+	}
 }
