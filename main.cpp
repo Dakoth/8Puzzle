@@ -53,7 +53,7 @@ class Problem {
         vector<int> goalState = {1, 2, 3, 4, 5, 6, 7, 8, 0};   //2D representation of the goalState 
         vector<int> inputPuzzle;
 
-        int depth;      //depth of a node / ALSO THE GENERAL COST OF A SOLN
+        int depth;      //depth of a node / ALSO G(N)  
         //int gn;         //general cost, generally increases as more nodes are added
         int hn;         //heuristic cost, depends on the type of heuristic used 
 
@@ -125,8 +125,16 @@ class Problem {
         //Constructors    // might need more constructors 
         Problem(vector<int> inputPuzzle) { //NOT SURE IF THIS IS CORRECT FOR WHAT I WANNA DO        
             this->inputPuzzle = inputPuzzle;
+            
         }
+        Problem (vector<int> inPuzz, int d, int hn_) { //
+            this->inputPuzzle = inPuzz;
+            this->depth = d;
+            this->hn = hn_;
+        }
+
         Problem() {};
+
 };
 
 
@@ -138,11 +146,12 @@ class minHeapComp {
         }
 };
 
-priority_queue< Problem, vector<Problem>, minHeapComp > Min_Heap;   //Generates a min heap 
+priority_queue< Problem, vector<Problem>, minHeapComp > PriorityQ;   //Generates a min heap 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Fix later
 void generalSearch (Problem& p) {
 
 
@@ -234,7 +243,70 @@ int main() {
 
     cout << "The result of checking if this is the goal state is: " << prob.goalTest() << endl;
 
+
+    //Testing out the priority queue of problems 
+    vector<int> p2 = {1, 2, 3, 4, 0, 8, 7, 6, 5};
+    vector<int> p3 = {1, 2, 3, 4, 0, 8, 7, 6, 5};
+    Problem prob2(p2, 0, 2);
+    Problem prob3(p3, 1, 4);
+
+    PriorityQ.push(prob);
+    PriorityQ.push(prob2);
+    PriorityQ.push(prob3);
     
+
+    Problem temp = PriorityQ.top();
+    temp.printResults();
+    PriorityQ.pop();
+    cout << endl;
+    
+    temp = PriorityQ.top();
+    temp.printResults();
+    PriorityQ.pop();
+
+    cout << endl;
+    temp = PriorityQ.top();
+    temp.printResults();
+    PriorityQ.pop();
+
+
+
+    cout << "END OF TESTING" << endl;
+    //PriorityQ.push()
+
+
+
+
+
+
+
+
+
+    //Second part 
+    user = '\0';
+    cout << "Enter your choice of algorithm" << endl;
+    cout << "1. Uniform Cost Search" << endl;
+    cout << "2. A* with the Misplaced Tile heuristic" << endl;
+    cout << "3. A* with the Manhattan Distance heuristic" << endl;
+ 
+    while (user != '1' && user != '2' && user != '3') { 
+        cin >> user; 
+        cin.ignore(); 
+
+        if (user == '1' ) { //h(n) = 0
+            cout << "UNIFORM COST SEARCH" << endl;
+        }
+        else if (user == '2') {
+             cout << "MISPLACED TILE" << endl;
+        }
+        else if (user == '3') {
+            cout << "MANHATTAN DISTANCE" << endl;
+        }
+        else {
+            cout << "Please pick a valid input" << endl;
+        }
+
+    }    
 
 
 
