@@ -9,20 +9,22 @@ using namespace std;
 int numOfNodes = 0; //global variable to count number of nodes
 int maxNumInQueue = 0; //Max number of nodes in a queue. 
 
-//priority_queue<Problem, vector<Problem>, greater<Problem> > Min_Heap;
 
+///////////////////////////////////////////////////
+//NODE CLASSES
 
+/* Orignal Node class
 class Node {
-    private: 
+    public: 
         int depth; //depth of a node 
         int gn; 
         int hn;   
     
-    public:
         //Node* child;
         //Node* ; 
         
         //Methods
+        
         void set_gn(int gn_) { this->gn = gn_;};
         int get_gn() { return this->gn; };
 
@@ -31,27 +33,42 @@ class Node {
 
         void set_depth(int depth_) {this->depth = depth_;};
         int get_depth() { return this-> depth; };
-    
+        
         //vector<Node*>child; 
         //COnstructors
         Node() { this->depth = 0; this->gn = 0; this->hn = 0; }; //default constructor
         Node(int depth, int gn, int hn) {this->depth = depth; this->gn = gn; this->hn = hn; } //other constructor
 };
-
+*/
 
 class Problem {
     private:
-        Node* root = nullptr; //root pointer to root
+        //Node* root = nullptr; //root pointer to root      TESTING OUT NOT HAVING A ROOT CLASS 
+
+
         //vector<int> inputPuzzle;
 
     public:
+        //Data 
         vector<int> goalState = {1, 2, 3, 4, 5, 6, 7, 8, 0};   //2D representation of the goalState 
         vector<int> inputPuzzle;
+
+        int depth;      //depth of a node / ALSO THE GENERAL COST OF A SOLN
+        //int gn;         //general cost, generally increases as more nodes are added
+        int hn;         //heuristic cost, depends on the type of heuristic used 
 
         //Methods
         void setPuzzle(vector<int> puz) {this->inputPuzzle = puz;}; 
 
 
+        //Adds all possible operators to the priority queue based off of their costs 
+        void operators(Problem& prob){
+
+            return;
+        }
+
+
+        //Actually moving them 
         void moveUp(Problem& prob) {
                 return;
         }
@@ -82,18 +99,52 @@ class Problem {
         }
 
 
+        //Test's if this problem is the goal state
+        bool goalTest() {  //orignally Problem& prob)
+            //bool test; //Assume true
 
-        //Constructors    
-        Problem(vector<int> inputPuzzle) { //NOT SURE IF THIS IS CORRECT FOR WHAT I WANNA DO
+            for (int i = 0; i < inputPuzzle.size(); i++) {
+                if (inputPuzzle.at(i) != goalState.at(i)) {        //If any element does not equal the goal state, then false
+                    return false;
+                }
+            }
+            return true;    //Means that this puzzle is the goal state, return true
+        }
+
+
+        //originally had this outside 
+        void printResults () {
+            cout << endl;
+            cout << inputPuzzle.at(0) << " " << inputPuzzle.at(1) << " " << inputPuzzle.at(2) << endl;
+            cout << inputPuzzle.at(3) << " " << inputPuzzle.at(4) << " " << inputPuzzle.at(5) << endl;
+            cout << inputPuzzle.at(6) << " " << inputPuzzle.at(7) << " " << inputPuzzle.at(8) << endl;
+            return;
+        }
+
+
+        //Constructors    // might need more constructors 
+        Problem(vector<int> inputPuzzle) { //NOT SURE IF THIS IS CORRECT FOR WHAT I WANNA DO        
             this->inputPuzzle = inputPuzzle;
         }
         Problem() {};
 };
 
 
+//PRIORITY QUEUE STUFF /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class minHeapComp {
+    public: 
+        int operator() (const Problem& p1, const Problem& p2 ) {
+            return (p1.depth + p1.hn) > (p2.depth + p2.hn); //empty for now
+        }
+};
+
+priority_queue< Problem, vector<Problem>, minHeapComp > Min_Heap;   //Generates a min heap 
 
 
-void generalSearch (Problem p) {
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+void generalSearch (Problem& p) {
+
 
 return; 
 
@@ -102,16 +153,18 @@ return;
 
 
 
-//Helper function
-void printResults (Problem p) {
-    cout << endl;
-    cout << p.inputPuzzle.at(0) << " " << p.inputPuzzle.at(1) << " " << p.inputPuzzle.at(2) << endl;
-    cout << p.inputPuzzle.at(3) << " " << p.inputPuzzle.at(4) << " " << p.inputPuzzle.at(5) << endl;
-    cout << p.inputPuzzle.at(6) << " " << p.inputPuzzle.at(7) << " " << p.inputPuzzle.at(8) << endl;
-    return;
-}
+/* Helper function (PUT THIS INSIDE THE PROBLEM CLASS)
+        void printResults (Problem& p) {
+            cout << endl;
+            cout << p.inputPuzzle.at(0) << " " << p.inputPuzzle.at(1) << " " << p.inputPuzzle.at(2) << endl;
+            cout << p.inputPuzzle.at(3) << " " << p.inputPuzzle.at(4) << " " << p.inputPuzzle.at(5) << endl;
+            cout << p.inputPuzzle.at(6) << " " << p.inputPuzzle.at(7) << " " << p.inputPuzzle.at(8) << endl;
+            return;
+        }
+*/
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //main program
 int main() {
     char user = '\0';
@@ -173,10 +226,15 @@ int main() {
         }
     }   
 
-    //test
+    //TESTING FUNCTIONS
     prob.setPuzzle(problem); //sets the inital problem puzzle to be the input
     cout << "TEST PRINT OF PROBLEM" << endl;
-    printResults(prob);
+    prob.printResults();
+    cout << endl;
+
+    cout << "The result of checking if this is the goal state is: " << prob.goalTest() << endl;
+
+    
 
 
 
