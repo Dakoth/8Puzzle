@@ -10,6 +10,12 @@ int numOfNodes = 0; //global variable to count number of nodes
 int maxNumInQueue = 0; //Max number of nodes in a queue. 
 
 
+int sortingAgorithm;  //used to determine which heuristic to use
+
+
+
+
+
 ///////////////////////////////////////////////////
 //NODE CLASSES
 
@@ -53,9 +59,13 @@ class Problem {
         vector<int> goalState = {1, 2, 3, 4, 5, 6, 7, 8, 0};   //2D representation of the goalState 
         vector<int> inputPuzzle;
 
+
+        //Originally from NOde class
         int depth;      //depth of a node / ALSO G(N)  
         //int gn;         //general cost, generally increases as more nodes are added
         int hn;         //heuristic cost, depends on the type of heuristic used 
+        //end of original node class stuff 
+
 
         //Methods
         void setPuzzle(vector<int> puz) {this->inputPuzzle = puz;}; 
@@ -63,7 +73,7 @@ class Problem {
 
         //Adds all possible operators to the priority queue based off of their costs 
         void operators(Problem& prob){
-
+            
             return;
         }
 
@@ -115,6 +125,7 @@ class Problem {
         //originally had this outside 
         void printResults () {
             cout << endl;
+            cout << "The best state to expand with a g(n) = " << this->depth << " and h(n) = " << this->hn << " is..." << endl;
             cout << inputPuzzle.at(0) << " " << inputPuzzle.at(1) << " " << inputPuzzle.at(2) << endl;
             cout << inputPuzzle.at(3) << " " << inputPuzzle.at(4) << " " << inputPuzzle.at(5) << endl;
             cout << inputPuzzle.at(6) << " " << inputPuzzle.at(7) << " " << inputPuzzle.at(8) << endl;
@@ -125,7 +136,8 @@ class Problem {
         //Constructors    // might need more constructors 
         Problem(vector<int> inputPuzzle) { //NOT SURE IF THIS IS CORRECT FOR WHAT I WANNA DO        
             this->inputPuzzle = inputPuzzle;
-            
+            this->depth = 0;
+            this->hn = 0;
         }
         Problem (vector<int> inPuzz, int d, int hn_) { //
             this->inputPuzzle = inPuzz;
@@ -150,15 +162,38 @@ priority_queue< Problem, vector<Problem>, minHeapComp > PriorityQ;   //Generates
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+//General search 
 
 //Fix later
-void generalSearch (Problem& p) {
+//Returns if the soln was found or not 
+bool generalSearch (Problem& p) { 
+    PriorityQ.push(p);
 
+    Problem temp;   //creates a temp problem 
 
-return; 
+    //While the queue is not empty 
+    while (PriorityQ.empty() != 0)  {
+        if (PriorityQ.empty()) {
+            //cout << "FAILURE" << endl;
+            return false;       //if the queue becomes empty, return 0 
+        }
 
+        temp = PriorityQ.top();     //makes temp the top of the priority queue
+        PriorityQ.pop();
+        
+        //If the goal is reached, then return 1 the algorithm 
+        if (temp.goalTest()) {
+            return true;
+        }
 
-}
+        //Next, expand operators into the queue
+        //NEED TO FIGURE OUT HOW TO DO THIS PART
+        //PriorityQ.push(temp.operators);
+    }
+
+    //assume it returns false ig 
+    return false;
+};
 
 
 
@@ -177,16 +212,18 @@ return;
 //main program
 int main() {
     char user = '\0';
+    //int sortingAgorithm;    //used for second choice
+
     string userPuzzle = "";  
     string userPuzzleConcat = "";
     //int problem[9] = {}; //Initalize an empty problem 
 
-    vector<int> problem;
+    vector<int> initalProblem;
     vector<int> defaultProb = {1, 2, 3, 4, 8, 0, 7, 6, 5};
 
 
     //testing out problem object
-    Problem prob;   //initalizes a problem 
+    //Problem prob;   //initalizes a problem 
     //prob.setPuzzle(defaultProb);
 
 
@@ -200,7 +237,7 @@ int main() {
         cin.ignore(); 
 
         if (user == '1' ) { //default puzzle 
-            problem = defaultProb;
+            initalProblem = defaultProb;
             //prob.setPuzzle(problem); //sets the inital problem puzzle to be the input
         }
         else if (user == '2') { //If not the default
@@ -226,7 +263,7 @@ int main() {
             char ch;
             
             while(ss >>n ){
-                problem.push_back(n);
+                initalProblem.push_back(n);
             }
             ss.clear();
         }
@@ -236,9 +273,12 @@ int main() {
     }   
 
     //TESTING FUNCTIONS
-    prob.setPuzzle(problem); //sets the inital problem puzzle to be the input
+    /*
+    Problem prob(initalProblem, 0, 0);   //initalizes a problem 
+
+   // prob.setPuzzle(initalProblem); //sets the inital problem puzzle to be the input
     cout << "TEST PRINT OF PROBLEM" << endl;
-    prob.printResults();
+    //prob.printResults();
     cout << endl;
 
     cout << "The result of checking if this is the goal state is: " << prob.goalTest() << endl;
@@ -272,40 +312,36 @@ int main() {
 
 
     cout << "END OF TESTING" << endl;
+    */ 
     //PriorityQ.push()
 
 
 
-
-
-
-
-
-
     //Second part 
-    user = '\0';
+    //user = '\0';
+    sortingAgorithm = 0;
     cout << "Enter your choice of algorithm" << endl;
     cout << "1. Uniform Cost Search" << endl;
     cout << "2. A* with the Misplaced Tile heuristic" << endl;
     cout << "3. A* with the Manhattan Distance heuristic" << endl;
  
-    while (user != '1' && user != '2' && user != '3') { 
-        cin >> user; 
+    while (sortingAgorithm != 1 && sortingAgorithm != 2 && sortingAgorithm != 3) { 
+        cin >> sortingAgorithm; 
         cin.ignore(); 
 
-        if (user == '1' ) { //h(n) = 0
+        if (sortingAgorithm == 1 ) { //h(n) = 0
             cout << "UNIFORM COST SEARCH" << endl;
+
         }
-        else if (user == '2') {
+        else if (sortingAgorithm == 2) {
              cout << "MISPLACED TILE" << endl;
         }
-        else if (user == '3') {
+        else if (sortingAgorithm == 3) {
             cout << "MANHATTAN DISTANCE" << endl;
         }
         else {
             cout << "Please pick a valid input" << endl;
         }
-
     }    
 
 
