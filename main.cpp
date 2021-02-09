@@ -6,14 +6,13 @@
 
 using namespace std;
 
-int numOfNodes = 0; //global variable to count number of nodes
+int numOfNodes = 1; //global variable to count number of nodes
 int maxNumInQueue = 0; //Max number of nodes in a queue. 
 
 
 int sortingAgorithm;  //used to determine which heuristic to use
 
-
-
+//queue<Problem> ExpandedOperatorProbs; //Used to queue the puzzles given when expanding operators
 
 
 ///////////////////////////////////////////////////
@@ -51,6 +50,7 @@ class Problem {
     private:
         //Node* root = nullptr; //root pointer to root      TESTING OUT NOT HAVING A ROOT CLASS 
 
+        Problem* parent = nullptr;  //not sure if need a problem pointer 
 
         //vector<int> inputPuzzle;
 
@@ -72,8 +72,32 @@ class Problem {
 
 
         //Adds all possible operators to the priority queue based off of their costs 
-        void operators(Problem& prob){
-            
+        void operators(){       //Prob don't need to have a Prob as an input 
+            int blankIndex = getBlankIndex();
+
+            //moveUP is allowed 
+            if (blankIndex > 2) {
+                cout << "CAN MOVE UP, CALL APPROPRIATE MOVE FUNC" << endl;
+            }
+
+
+            // moveDown allowed
+            if (blankIndex < 6) {
+                cout << "CAN MOVE down, CALL APPROPRIATE MOVE FUNC" << endl;
+            }
+
+
+            //move left 
+            if ( (blankIndex % 3 > 0) ) {
+                cout << "CAN MOVE left, CALL APPROPRIATE MOVE FUNC" << endl;
+            }
+ 
+            //move Right
+            if ( (blankIndex % 3 < 2) ) {
+                cout << "CAN MOVE RIGHT, CALL APPROPRIATE MOVE FUNC" << endl;
+            }
+
+
             return;
         }
 
@@ -98,11 +122,11 @@ class Problem {
 
 
         //returns index for blank character
-        int getBlankIndex(Problem& prob) {
+        int getBlankIndex() { //(Problem& prob) {           //originally prob...
             int index;
-            for (int i = 0; i < prob.inputPuzzle.size(); i++) {
-                if (prob.inputPuzzle.at(i) == 0) {
-                    index = prob.inputPuzzle.at(i);
+            for (int i = 0; i < inputPuzzle.size(); i++) {
+                if (inputPuzzle.at(i) == 0) {
+                    index = inputPuzzle.at(i);
                 }
             }
             return index; 
@@ -113,6 +137,8 @@ class Problem {
         bool goalTest() {  //orignally Problem& prob)
             //bool test; //Assume true
 
+            //cout << "goalTest called" << endl;
+ 
             for (int i = 0; i < inputPuzzle.size(); i++) {
                 if (inputPuzzle.at(i) != goalState.at(i)) {        //If any element does not equal the goal state, then false
                     return false;
@@ -133,6 +159,7 @@ class Problem {
         }
 
 
+
         //Constructors    // might need more constructors 
         Problem(vector<int> inputPuzzle) { //NOT SURE IF THIS IS CORRECT FOR WHAT I WANNA DO        
             this->inputPuzzle = inputPuzzle;
@@ -148,6 +175,10 @@ class Problem {
         Problem() {};
 
 };
+
+//Queue stuff
+
+queue<Problem> ExpandedOperatorProbs;
 
 
 //PRIORITY QUEUE STUFF /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,33 +197,62 @@ priority_queue< Problem, vector<Problem>, minHeapComp > PriorityQ;   //Generates
 
 //Fix later
 //Returns if the soln was found or not 
-bool generalSearch (Problem& p) { 
+void generalSearch (Problem& p) { 
+    //cout << "yuh" << endl;      // endl;
+
     PriorityQ.push(p);
+    maxNumInQueue = PriorityQ.size();    //set inital max 
+    
+    
+
 
     Problem temp;   //creates a temp problem 
 
     //While the queue is not empty 
-    while (PriorityQ.empty() != 0)  {
-        if (PriorityQ.empty()) {
-            //cout << "FAILURE" << endl;
-            return false;       //if the queue becomes empty, return 0 
-        }
+    while (!PriorityQ.empty())  {
+        cout << "in while loop" << endl;
 
         temp = PriorityQ.top();     //makes temp the top of the priority queue
-        PriorityQ.pop();
         
-        //If the goal is reached, then return 1 the algorithm 
-        if (temp.goalTest()) {
-            return true;
+        
+        temp.printResults();  
+
+
+        if (PriorityQ.empty()) {
+            cout << "FAILURE" << endl;
+            return;       //if the queue becomes empty, report failure
         }
 
+        
+        //If the goal is reached, then return success
+        if (temp.goalTest()) {
+            cout << "Goal!!!" << endl;
+            cout << "To solve this problem the search algorithm expanded a total of " << numOfNodes << " nodes." << endl;
+            cout << "The maximum number of nodes in the queue at any one time was " << maxNumInQueue << "." << endl;
+            cout << "The depth of the goal node was " << temp.depth << endl;
+            return;
+        }
+
+
+        PriorityQ.pop();  //Need to pop the queue after checking 
+
         //Next, expand operators into the queue
-        //NEED TO FIGURE OUT HOW TO DO THIS PART
-        //PriorityQ.push(temp.operators);
+        //NEED TO FIGURE OUT HOW TO DO THIS PART, Probably in some kind of forloop using the operator vector
+        //PriorityQ.push(temp.operators());
+        //numOfNodes++;       //increment num of nodes
+       
+
+
+        //Update max num of nodes in queue if need be
+        if (maxNumInQueue < PriorityQ.size() ) {
+            maxNumInQueue = PriorityQ.size();
+        }
+
     }
 
-    //assume it returns false ig 
-    return false;
+    cout << "exited loop" << endl;
+    //assume it returns 
+    return;
 };
 
 
@@ -212,7 +272,10 @@ bool generalSearch (Problem& p) {
 //main program
 int main() {
     char user = '\0';
-    //int sortingAgorithm;    //used for second choice
+    int sortingAgorithm;    //used for second choice
+    bool isSolvable;
+
+
 
     string userPuzzle = "";  
     string userPuzzleConcat = "";
@@ -330,8 +393,10 @@ int main() {
         cin.ignore(); 
 
         if (sortingAgorithm == 1 ) { //h(n) = 0
+            Problem prob(initalProblem, 0, 0);
             cout << "UNIFORM COST SEARCH" << endl;
-
+            generalSearch(prob);           //TESTING
+            
         }
         else if (sortingAgorithm == 2) {
              cout << "MISPLACED TILE" << endl;
@@ -344,6 +409,7 @@ int main() {
         }
     }    
 
+    cout << "reached end of program" << endl;
 
 
     //tests if the array was added 
