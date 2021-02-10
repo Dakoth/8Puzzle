@@ -2,14 +2,14 @@
 #include <string>
 #include <queue>
 #include <vector> 
-#include <sstream>
+#include <sstream>  //For taking in input 
+
+#include <algorithm> //For swapping values in puzzle
 
 using namespace std;
 
 int numOfNodes = 1; //global variable to count number of nodes
 int maxNumInQueue = 0; //Max number of nodes in a queue. 
-
-
 int sortingAgorithm;  //used to determine which heuristic to use
 
 //queue<Problem> ExpandedOperatorProbs; //Used to queue the puzzles given when expanding operators
@@ -50,7 +50,7 @@ class Problem {
     private:
         //Node* root = nullptr; //root pointer to root      TESTING OUT NOT HAVING A ROOT CLASS 
 
-        Problem* parent = nullptr;  //not sure if need a problem pointer 
+        Problem* childOrParent = nullptr;  //not sure if need a problem pointer 
 
         //vector<int> inputPuzzle;
 
@@ -61,72 +61,136 @@ class Problem {
 
 
         //Originally from NOde class
-        int depth;      //depth of a node / ALSO G(N)  
-        //int gn;         //general cost, generally increases as more nodes are added
+        int depth;      //depth of a node / ALSO G(N)  general cost, [generally increases as more nodes are added]
         int hn;         //heuristic cost, depends on the type of heuristic used 
         //end of original node class stuff 
 
 
         //Methods
-        void setPuzzle(vector<int> puz) {this->inputPuzzle = puz;}; 
+        void setPuzzle(vector<int>& puz) {this->inputPuzzle = puz;}; 
 
 
-        //Adds all possible operators to the priority queue based off of their costs 
-        void operators(){       //Prob don't need to have a Prob as an input 
+        //Adds all possible operators to the ExpandedOperatorProbs to then be added to priority queue based off of their costs 
+        void operators(Problem& p){       //might need to have a Prob as an input 
             int blankIndex = getBlankIndex();
+
+            p.depth++;   //increment the depth by 1 when you add  an operator //Not sure if it should be here or inside funct
+
+            //cout << blankIndex << endl; //test
+            cout << "OPERATORS CALLED " << endl;
+
+
+            Problem t;       //makes a default problem, unsure If i need to make other ones 
 
             //moveUP is allowed 
             if (blankIndex > 2) {
+                t = p; 
                 cout << "CAN MOVE UP, CALL APPROPRIATE MOVE FUNC" << endl;
+
+
+                t.setPuzzle(t.moveUp()); //Not sure if this function works like this??????
+
+                numOfNodes++; //increment if this operator is valid
+                //this->depth++;   //increment the depth by 1 when you add  an operator 
+                //MIGHT NEED SOMETHING TO HANDLE IF USING A HUERSITC OR NOT 
+                
+                ExpandedOperatorProbs.push(t);
             }
 
 
             // moveDown allowed
             if (blankIndex < 6) {
+                t = p;
                 cout << "CAN MOVE down, CALL APPROPRIATE MOVE FUNC" << endl;
+
+                //t.moveDown();
+                numOfNodes++; //increment if this operator is valid
+                //this->depth++;   //increment the depth by 1 when you add  an operator 
+
+                t.setPuzzle(t.moveDown());
+                ExpandedOperatorProbs.push(t);
+                
             }
 
 
             //move left 
-            if ( (blankIndex % 3 > 0) ) {
+            if ( (blankIndex % 3) > 0 ) {
+                t = p;
                 cout << "CAN MOVE left, CALL APPROPRIATE MOVE FUNC" << endl;
+
+                //t.moveLeft();
+                numOfNodes++; //increment if this operator is valid
+                //this->depth++;   //increment the depth by 1 when you add  an operator 
+
+                t.setPuzzle(t.moveLeft());
+                ExpandedOperatorProbs.push(t);
             }
  
             //move Right
-            if ( (blankIndex % 3 < 2) ) {
+            if ( (blankIndex % 3) < 2)  {
+                t = p;
                 cout << "CAN MOVE RIGHT, CALL APPROPRIATE MOVE FUNC" << endl;
+
+
+                //t.moveRight();
+                numOfNodes++; //increment if this operator is valid
+                //this->depth++;   //increment the depth by 1 when you add  an operator 
+                t.setPuzzle(t.moveRight());
+                ExpandedOperatorProbs.push(t);
             }
-
-
             return;
         }
 
 
         //Actually moving them 
-        void moveUp(Problem& prob) {
-                return;
+        //returns a vector with the moved element
+        //Because of the constraints given in Operator class, this SHOULD not lead to any issues of swapping an element 
+        vector<int> moveUp() {  //orignally all had a parameter Problem
+            vector<int> tempP1 = this->inputPuzzle;
+            //vector<int> tempP2 = this->inputPuzzle;
+            int zeroIndex = getBlankIndex();
+
+            iter_swap(tempP1.at(zeroIndex), tempP1.at(zeroIndex - 3) ); //swaps the elements 
+
+            return tempP1;  //I think tempP1 is the one I'm supposed to return...
         }
 
-        void moveDown(Problem& prob) {
-                return;
+        vector<int> moveDown() {
+            vector<int> tempP1 = this->inputPuzzle;
+            //vector<int> tempP2 = this->inputPuzzle;
+            int zeroIndex = getBlankIndex();
+
+            iter_swap(tempP1.at(zeroIndex), tempP1.at(zeroIndex + 3) ); //swaps the elements 
+
+            return tempP1;
         }
 
-        void moveLeft(Problem& prob) {
-                return;
+        vector<int> moveLeft() {
+            vector<int> tempP1 = this->inputPuzzle;
+            int zeroIndex = getBlankIndex();
+
+            iter_swap(tempP1.at(zeroIndex), tempP1.at(zeroIndex - 1) ); //swaps the elements 
+            return tempP1;
         }
 
-        void moveRight(Problem& prob) {
-                return;
+        vector<int> moveRight() {
+            vector<int> tempP1 = this->inputPuzzle;
+            int zeroIndex = getBlankIndex();
+
+            iter_swap(tempP1.at(zeroIndex), tempP1.at(zeroIndex + 1) ); //swaps the elements 
+            return tempP1;
         }
 
 
 
         //returns index for blank character
         int getBlankIndex() { //(Problem& prob) {           //originally prob...
-            int index;
+            int index = 0;  
+
             for (int i = 0; i < inputPuzzle.size(); i++) {
-                if (inputPuzzle.at(i) == 0) {
-                    index = inputPuzzle.at(i);
+                if (inputPuzzle.at(i) == 0) { 
+                    //cout << "recognized that " << i << " is the BlankIndex" << endl; //test
+                    index = i;
                 }
             }
             return index; 
@@ -135,8 +199,6 @@ class Problem {
 
         //Test's if this problem is the goal state
         bool goalTest() {  //orignally Problem& prob)
-            //bool test; //Assume true
-
             //cout << "goalTest called" << endl;
  
             for (int i = 0; i < inputPuzzle.size(); i++) {
@@ -178,7 +240,7 @@ class Problem {
 
 //Queue stuff
 
-queue<Problem> ExpandedOperatorProbs;
+queue<Problem> ExpandedOperatorProbs;   //used for Operator class to store expanded problems 
 
 
 //PRIORITY QUEUE STUFF /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,28 +263,38 @@ void generalSearch (Problem& p) {
     //cout << "yuh" << endl;      // endl;
 
     PriorityQ.push(p);
+
+
+    //TESTING out 2 elemeents in the queue
+    //vector<int> p2 = {1, 2, 3, 4, 5, 6, 7, 8, 0};
+    //vector<int> p3 = {1, 2, 3, 4, 0, 8, 7, 6, 5};
+    //Problem prob2(p2, 0, 1);
+    //PriorityQ.push(prob2);
+
+    // END OF TEST
+
+
     maxNumInQueue = PriorityQ.size();    //set inital max 
     
-    
+    Problem temp;   //creates a temp problem, used to represent the top of the queue n stuff 
 
-
-    Problem temp;   //creates a temp problem 
+    Problem tempForInput;           //Creates a temporary problem that is then set to equal temp, used to pass in values to Operator
+    cout << "TESTING SIZE: " << PriorityQ.size() << endl;
 
     //While the queue is not empty 
-    while (!PriorityQ.empty())  {
-        cout << "in while loop" << endl;
+    while (PriorityQ.size() >= 0 )  {         //orignally !PriorityQ.empty()
+        //cout << "in while loop" << endl;
 
-        temp = PriorityQ.top();     //makes temp the top of the priority queue
+        temp = PriorityQ.top();     //makes temp the top element of the priority queue
         
+        tempForInput = temp;       //Used for when we pass into Operator()
         
-        temp.printResults();  
-
-
         if (PriorityQ.empty()) {
             cout << "FAILURE" << endl;
             return;       //if the queue becomes empty, report failure
         }
 
+        temp.printResults();   //Not sure if I should put this here 
         
         //If the goal is reached, then return success
         if (temp.goalTest()) {
@@ -239,7 +311,14 @@ void generalSearch (Problem& p) {
         //Next, expand operators into the queue
         //NEED TO FIGURE OUT HOW TO DO THIS PART, Probably in some kind of forloop using the operator vector
         //PriorityQ.push(temp.operators());
+        //PriorityQ.top().operators();
+        temp.operators(tempForInput);
         //numOfNodes++;       //increment num of nodes
+
+        //Next, add the expanded operators to the Priority Queue
+        for (int i = 0; i < ExpandedOperatorProbs.size(); i++) {
+            PriorityQ.push(ExpandedOperatorProbs.at(i)); 
+        }
        
 
 
@@ -257,7 +336,7 @@ void generalSearch (Problem& p) {
 
 
 
-/* Helper function (PUT THIS INSIDE THE PROBLEM CLASS)
+/* Helper function (I put THIS INSIDE THE PROBLEM CLASS)
         void printResults (Problem& p) {
             cout << endl;
             cout << p.inputPuzzle.at(0) << " " << p.inputPuzzle.at(1) << " " << p.inputPuzzle.at(2) << endl;
@@ -272,7 +351,6 @@ void generalSearch (Problem& p) {
 //main program
 int main() {
     char user = '\0';
-    int sortingAgorithm;    //used for second choice
     bool isSolvable;
 
 
@@ -285,16 +363,10 @@ int main() {
     vector<int> defaultProb = {1, 2, 3, 4, 8, 0, 7, 6, 5};
 
 
-    //testing out problem object
-    //Problem prob;   //initalizes a problem 
-    //prob.setPuzzle(defaultProb);
-
-
-
     cout << "Hello and Welcome to Alfredo Gonzalez' 8-puzzle solver " << endl;
     cout << "Type \"1\" to use a default puzzle, or \"2\" to enter your own puzzle." << endl;
     
-    //Puzzle choices
+    //Puzzle choices WORKS!!
     while (user != '1' && user != '2') { 
         cin >> user; 
         cin.ignore(); 
@@ -325,6 +397,7 @@ int main() {
             int n;
             char ch;
             
+            //
             while(ss >>n ){
                 initalProblem.push_back(n);
             }
