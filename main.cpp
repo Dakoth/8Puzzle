@@ -84,13 +84,14 @@ void Problem::setPuzzle(vector<int> puz) {this->inputPuzzle = puz;};         //o
 
 
 //Adds all possible operators to the ExpandedOperatorProbs to then be added to priority queue based off of their costs 
+//p = parent 
 void Problem::operators(Problem& p){       //might need to have a Prob as an input 
     int blankIndex = getBlankIndex();
 
     p.depth++;   //increment the depth by 1 when you add  an operator //Not sure if it should be here or inside funct
 
     //cout << blankIndex << endl; //test
-    cout << "OPERATORS CALLED " << endl;
+    //cout << "OPERATORS CALLED " << endl;
 
 
     Problem t;       //makes a default problem, unsure If i need to make other ones 
@@ -155,7 +156,6 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
     }
     return;
 }
-
 
 //Actually moving them 
 //returns a vector with the moved element
@@ -241,9 +241,6 @@ void Problem::printResults () {
 
 
 
-
-
-
 //Queue stuff
 
 //queue<Problem> ExpandedOperatorProbs;   //used for Operator class to store expanded problems 
@@ -294,6 +291,7 @@ void generalSearch (Problem& p) {
             return;       //if the queue becomes empty, report failure
         }
 
+
         temp.printResults();   //Not sure if I should put this here 
         
         //If the goal is reached, then return success
@@ -309,7 +307,6 @@ void generalSearch (Problem& p) {
         PriorityQ.pop();  //Need to pop the queue after checking 
 
         //Next, expand operators into the queue
-        //NEED TO FIGURE OUT HOW TO DO THIS PART, Probably in some kind of forloop using the operator vector
         //PriorityQ.push(temp.operators());
         //PriorityQ.top().operators();
         temp.operators(tempForInput);
@@ -335,7 +332,7 @@ void generalSearch (Problem& p) {
 
     }
 
-    cout << "exited loop" << endl;
+    //cout << "exited loop" << endl;
     //assume it returns 
     return;
 };
@@ -345,9 +342,7 @@ void generalSearch (Problem& p) {
 //main program
 int main() {
     char user = '\0';
-    bool isSolvable;
-
-
+    //bool isSolvable;
 
     string userPuzzle = "";  
     string userPuzzleConcat = "";

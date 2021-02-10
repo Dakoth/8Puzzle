@@ -12,11 +12,20 @@
 using namespace std;
 
 
+//Struct Node {}};
+
+
+
 class Problem {
     private:
         //Node* root = nullptr; //root pointer to root      TESTING OUT NOT HAVING A ROOT CLASS 
 
-        Problem* childOrParent = nullptr;  //not sure if need a problem pointer 
+        //Problem* root = nullptr;  
+
+        //Problem* up = nullptr; 
+        //Problem* down = nullptr;
+        //Problem* left = nullptr; 
+        //Problem* right = nullptr;
 
         //vector<int> inputPuzzle;
 
@@ -24,6 +33,9 @@ class Problem {
         //Data 
         vector<int> goalState = {1, 2, 3, 4, 5, 6, 7, 8, 0};   //2D representation of the goalState 
         vector<int> inputPuzzle;
+        
+        
+        vector<Problem> children; 
 
 
         //Originally from NOde class
