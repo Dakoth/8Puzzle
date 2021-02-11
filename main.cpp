@@ -15,9 +15,6 @@ int maxNumInQueue = 0; //Max number of nodes in a queue.
 int sortingAgorithm;  //used to determine which heuristic to use
 
 
-//queue<Problem> ExpandedOperatorProbs; //Used to queue the puzzles given when expanding operators
-
-
 //PRIORITY QUEUE STUFF /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class minHeapComp {
     public: 
@@ -27,6 +24,8 @@ class minHeapComp {
 };
 
 priority_queue< Problem, vector<Problem>, minHeapComp > PriorityQ;   //Generates a min heap 
+
+//Make this a prioQ of Problem* instead of Problem? could dereference them when finished 
 priority_queue< Problem, vector<Problem>, minHeapComp > ExpandedOperatorProbs; //used for Operator class to store expanded problems 
 
 
@@ -77,6 +76,13 @@ Problem::Problem (vector<int> inPuzz, int d, int hn_) { //
     this->hn = hn_;
 }
 
+//Copy constructor, might need
+Problem::Problem(const Problem& oldProb) {
+    this->inputPuzzle = oldProb.inputPuzzle;
+    this->depth = oldProb.depth; 
+    this->hn = oldProb.hn;
+}
+
 //Problem::Problem() {};
 
 
@@ -89,70 +95,70 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
     int blankIndex = getBlankIndex();
 
     p.depth++;   //increment the depth by 1 when you add  an operator //Not sure if it should be here or inside funct
-
     //cout << blankIndex << endl; //test
     //cout << "OPERATORS CALLED " << endl;
-
-
-    Problem t;       //makes a default problem, unsure If i need to make other ones 
-
+    
     //moveUP is allowed 
     
     if (blankIndex > 2) {
-        t = p; 
+        //t = p; 
         //cout << "CAN MOVE UP, CALL APPROPRIATE MOVE FUNC" << endl;
-
-
-        t.setPuzzle(t.moveUp()); //Not sure if this function works like this??????
-
         numOfNodes++; //increment if this operator is valid
         //this->depth++;   //increment the depth by 1 when you add  an operator 
         //MIGHT NEED SOMETHING TO HANDLE IF USING A HUERSITC OR NOT 
+        //ExpandedOperatorProbs.push(t);
+
+        //originally was p.up?
+        //Sets the child to be a new prob ...
+        //cout << "Before pointer " << endl; 
+        p.up = new Problem(p.inputPuzzle, p.depth, p.hn);
+
         
-        ExpandedOperatorProbs.push(t);
+
+        // cout << "Makes a child pointer" << endl;
+        //p.up->setPuzzle(p.inputPuzzle);
+        //cout << "sets up that child's puzzle" << endl;
+
+        p.up->setPuzzle(p.up->moveUp());            //This statement is what's causing the crash
+        //cout << "Successfully made set the puzzle of the child to the operated one" << endl;
+        ExpandedOperatorProbs.push( *(p.up) );
+        //cout << "Pushed thsi child onto a queue" << endl;
     }
 
 
     // moveDown allowed
     if (blankIndex < 6) {
-        t = p;
-        //cout << "CAN MOVE down, CALL APPROPRIATE MOVE FUNC" << endl;
-
-        //t.moveDown();
-        numOfNodes++; //increment if this operator is valid
-        //this->depth++;   //increment the depth by 1 when you add  an operator 
-
-        t.setPuzzle(t.moveDown());
-        ExpandedOperatorProbs.push(t);
         
+        //cout << "CAN MOVE down, CALL APPROPRIATE MOVE FUNC" << endl;
+        numOfNodes++; //increment if this operator is valid
+        //Sets the child to be a new prob ... 
+        p.down = new Problem(p.inputPuzzle, p.depth, p.hn);
+        p.down->setPuzzle(p.down->moveDown());
+        ExpandedOperatorProbs.push( *(p.down) );
     }
 
 
     //move left 
     if ( (blankIndex % 3) > 0 ) {
-        t = p;
         //cout << "CAN MOVE left, CALL APPROPRIATE MOVE FUNC" << endl;
 
-        //t.moveLeft();
         numOfNodes++; //increment if this operator is valid
-        //this->depth++;   //increment the depth by 1 when you add  an operator 
-
-        t.setPuzzle(t.moveLeft());
-        ExpandedOperatorProbs.push(t);
+        //Sets the child to be a new prob ... 
+        p.left = new Problem(p.inputPuzzle, p.depth, p.hn);   //Child pointer points to child node 
+        p.left->setPuzzle(p.left->moveLeft());            //set the puzzle of the child to the puzzle after doing Op 
+        ExpandedOperatorProbs.push(*(p.left));             //enqueue this Problem* to a queue
     }
 
     
     //move Right
     if ( (blankIndex % 3) < 2)  {
-        t = p;
-        cout << "CAN MOVE RIGHT, CALL APPROPRIATE MOVE FUNC" << endl;
-
-
-        //t.moveRight();
+        //cout << "CAN MOVE RIGHT, CALL APPROPRIATE MOVE FUNC" << endl;
         numOfNodes++; //increment if this operator is valid
-        //this->depth++;   //increment the depth by 1 when you add  an operator 
-        t.setPuzzle(t.moveRight());
-        ExpandedOperatorProbs.push(t);
+
+        //Sets the child to be a new prob ... 
+        p.right = new Problem(p.inputPuzzle, p.depth, p.hn); //Child pointer points to child node 
+        p.right->setPuzzle(p.right->moveRight());            //set the puzzle of the child to the puzzle after doing Op 
+        ExpandedOperatorProbs.push(*(p.right));             //enqueue this Problem* to a queue
     }
     return;
 }
@@ -165,19 +171,17 @@ vector<int> Problem::moveUp() {  //orignally all had a parameter Problem
     //vector<int> tempP2 = this->inputPuzzle;
     int zeroIndex = getBlankIndex();
 
-    //iter_swap(tempP1.at(zeroIndex), tempP1.at(zeroIndex - 3) ); //swaps the elements 
-    iter_swap(tempP1.begin() +zeroIndex - 1, tempP1.begin() +zeroIndex - 1 - 3); //swaps the elements 
+
+    //(oringally did - 1 to everything)
+    iter_swap(tempP1.begin() +zeroIndex, tempP1.begin() +zeroIndex- 3); //swaps the elements 
 
     return tempP1;  //I think tempP1 is the one I'm supposed to return...
 }
 
 vector<int> Problem::moveDown() {
     vector<int> tempP1 = this->inputPuzzle;
-    //vector<int> tempP2 = this->inputPuzzle;
     int zeroIndex = getBlankIndex();
-
-    //iter_swap(tempP1.at(zeroIndex), tempP1.at(zeroIndex + 3) ); //swaps the elements 
-    iter_swap(tempP1.begin() +zeroIndex - 1, tempP1.begin() +zeroIndex - 1 + 3); //swaps the elements 
+    iter_swap(tempP1.begin() +zeroIndex, tempP1.begin() +zeroIndex+ 3); //swaps the elements 
 
     return tempP1;
 }
@@ -185,18 +189,16 @@ vector<int> Problem::moveDown() {
 vector<int> Problem::moveLeft() {
     vector<int> tempP1 = this->inputPuzzle;
     int zeroIndex = getBlankIndex();
+    iter_swap(tempP1.begin() +zeroIndex, tempP1.begin() +zeroIndex - 1); //swaps the elements 
 
-    //iter_swap(tempP1.at(zeroIndex), tempP1.at(zeroIndex - 1) ); //swaps the elements 
-    iter_swap(tempP1.begin() +zeroIndex - 1, tempP1.begin() +zeroIndex - 1 - 1); //swaps the elements 
     return tempP1;
 }
 
 vector<int> Problem::moveRight() {
     vector<int> tempP1 = this->inputPuzzle;
     int zeroIndex = getBlankIndex();
+    iter_swap(tempP1.begin() +zeroIndex, tempP1.begin() +zeroIndex+ 1); //swaps the elements 
 
-    //iter_swap(tempP1.at(zeroIndex), tempP1.at(zeroIndex + 1) ); //swaps the elements 
-    iter_swap(tempP1.begin() +zeroIndex - 1, tempP1.begin() +zeroIndex - 1 + 1); //swaps the elements 
     return tempP1;
 }
 
@@ -240,20 +242,13 @@ void Problem::printResults () {
 }
 
 
-
 //Queue stuff
 
 //queue<Problem> ExpandedOperatorProbs;   //used for Operator class to store expanded problems 
-
-
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
-//General search 
+//General search  Returns if the soln was found or not 
+//int PauseProgram;   //Use a cin to stop execution FOR TESTING PURPOSES
 
-//Fix later
-//Returns if the soln was found or not 
 void generalSearch (Problem& p) { 
     //cout << "yuh" << endl;      // endl;
 
@@ -281,10 +276,12 @@ void generalSearch (Problem& p) {
     //While the queue is not empty 
     while (PriorityQ.size() >= 0 )  {         //orignally !PriorityQ.empty()
         //cout << "in while loop" << endl;
+        Problem tempForInput; 
 
         temp = PriorityQ.top();     //makes temp the top element of the priority queue
         
-        tempForInput = temp;       //Used for when we pass into Operator()
+        //tempForInput = new Problem(temp.inputPuzzle, temp.depth, temp.hn);       //Used for when we pass into Operator()
+        tempForInput = temp;
         
         if (PriorityQ.empty()) {
             cout << "FAILURE" << endl;
@@ -293,6 +290,8 @@ void generalSearch (Problem& p) {
 
 
         temp.printResults();   //Not sure if I should put this here 
+
+        //cout << "Help " << endl;
         
         //If the goal is reached, then return success
         if (temp.goalTest()) {
@@ -307,28 +306,33 @@ void generalSearch (Problem& p) {
         PriorityQ.pop();  //Need to pop the queue after checking 
 
         //Next, expand operators into the queue
-        //PriorityQ.push(temp.operators());
-        //PriorityQ.top().operators();
         temp.operators(tempForInput);
         //numOfNodes++;       //increment num of nodes
 
-        //cout << "The size of Operators Queue is: " << ExpandedOperatorProbs.size() << endl;     //TEST
+        //delete tempForInput;    //maybe delete it?
+
+
+        //cout << "ME" << endl;
+
+        cout << "The size of Operators Queue is: " << ExpandedOperatorProbs.size() << endl;     //TEST
 
 
         //Next, add the expanded operators (if any) to the Priority Queue until the expanded operator queue is empty
         //for (int i = 0; i < ExpandedOperatorProbs.size(); i++) {
         //Should skip if empty
-        while (!ExpandedOperatorProbs.empty()) {
-            PriorityQ.push(ExpandedOperatorProbs.top());          //orignally was .front() cause EOP was a regular queue
+        while(!ExpandedOperatorProbs.empty()) {
+            PriorityQ.push( ExpandedOperatorProbs.top() );         //orignally was .front() cause EOP was a regular queue
             ExpandedOperatorProbs.pop();
         }
        
-
+        //This should? ^^^^^^^^ push the correct Operator to the array????
 
         //Update max num of nodes in queue if need be
         if (maxNumInQueue < PriorityQ.size() ) {
             maxNumInQueue = PriorityQ.size();
         }
+
+        //cin >> PauseProgram; //FOR TESTING
 
     }
 
@@ -342,11 +346,9 @@ void generalSearch (Problem& p) {
 //main program
 int main() {
     char user = '\0';
-    //bool isSolvable;
 
     string userPuzzle = "";  
     string userPuzzleConcat = "";
-    //int problem[9] = {}; //Initalize an empty problem 
 
     vector<int> initalProblem;
     vector<int> defaultProb = {1, 2, 3, 4, 8, 0, 7, 6, 5};
@@ -397,51 +399,7 @@ int main() {
         }
     }   
 
-    //TESTING FUNCTIONS
-    /*
-    Problem prob(initalProblem, 0, 0);   //initalizes a problem 
-
-   // prob.setPuzzle(initalProblem); //sets the inital problem puzzle to be the input
-    cout << "TEST PRINT OF PROBLEM" << endl;
-    //prob.printResults();
-    cout << endl;
-
-    cout << "The result of checking if this is the goal state is: " << prob.goalTest() << endl;
-
-
-    //Testing out the priority queue of problems 
-    vector<int> p2 = {1, 2, 3, 4, 0, 8, 7, 6, 5};
-    vector<int> p3 = {1, 2, 3, 4, 0, 8, 7, 6, 5};
-    Problem prob2(p2, 0, 2);
-    Problem prob3(p3, 1, 4);
-
-    PriorityQ.push(prob);
-    PriorityQ.push(prob2);
-    PriorityQ.push(prob3);
     
-
-    Problem temp = PriorityQ.top();
-    temp.printResults();
-    PriorityQ.pop();
-    cout << endl;
-    
-    temp = PriorityQ.top();
-    temp.printResults();
-    PriorityQ.pop();
-
-    cout << endl;
-    temp = PriorityQ.top();
-    temp.printResults();
-    PriorityQ.pop();
-
-
-
-    cout << "END OF TESTING" << endl;
-    */ 
-    //PriorityQ.push()
-
-
-
     //Second part 
     //user = '\0';
     sortingAgorithm = 0;
@@ -471,17 +429,9 @@ int main() {
         }
     }    
 
-    cout << "reached end of program" << endl;
+    //cout << "reached end of program" << endl;
 
 
-    //tests if the array was added 
-    /*
-    for(int i = 0; i < problem.size(); i++){ 
-         cout << problem.at(i) << " ";
-    }
-    */
-
-   
     //Testing out 2d arrays, maybe could use this for mismatched heuristic 
     int mismatches = 0; 
     /*

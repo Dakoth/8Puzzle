@@ -22,10 +22,11 @@ class Problem {
 
         //Problem* root = nullptr;  
 
-        //Problem* up = nullptr; 
-        //Problem* down = nullptr;
-        //Problem* left = nullptr; 
-        //Problem* right = nullptr;
+        //Pointers to the possible operators 
+        Problem* up = nullptr; 
+        Problem* down = nullptr;
+        Problem* left = nullptr; 
+        Problem* right = nullptr;
 
         //vector<int> inputPuzzle;
 
@@ -35,7 +36,7 @@ class Problem {
         vector<int> inputPuzzle;
         
         
-        vector<Problem> children; 
+        //vector<Problem> children; 
 
 
         //Originally from NOde class
@@ -45,6 +46,7 @@ class Problem {
 
 
         //Methods
+        //Sets inputPuzzle
         void setPuzzle(vector<int> puz);          //originally by reference?
 
 
@@ -77,6 +79,9 @@ class Problem {
         Problem(vector<int> inputPuzzle); 
         Problem (vector<int> inPuzz, int d, int hn_);
         Problem() {};
+
+        Problem(const Problem& oldProb);            //Copy constructor
+        //~Problem(); //destructor 
 
 };
 
