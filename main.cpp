@@ -2,6 +2,7 @@
 #include <string>
 #include <queue>
 #include <vector> 
+
 #include <sstream>  //For taking in input 
 
 #include <algorithm> //For swapping values in puzzle
@@ -25,8 +26,9 @@ class minHeapComp {
 
 priority_queue< Problem, vector<Problem>, minHeapComp > PriorityQ;   //Generates a min heap 
 
-//Make this a prioQ of Problem* instead of Problem? could dereference them when finished 
+//Not sure if this should be a queue or PrioQ
 priority_queue< Problem, vector<Problem>, minHeapComp > ExpandedOperatorProbs; //used for Operator class to store expanded problems 
+//queue<Problem> ExpandedOperatorProbs;    
 
 
 
@@ -85,42 +87,45 @@ Problem::Problem(const Problem& oldProb) {
 
 //Problem::Problem() {};
 
-
+//Getter functions 
 void Problem::setPuzzle(vector<int> puz) {this->inputPuzzle = puz;};         //originally by reference?
+void Problem::setHn(int hn_) {this->hn = hn_;}
 
 
+
+//Other Methods
 //Adds all possible operators to the ExpandedOperatorProbs to then be added to priority queue based off of their costs 
 //p = parent 
 void Problem::operators(Problem& p){       //might need to have a Prob as an input 
     int blankIndex = getBlankIndex();
 
     p.depth++;   //increment the depth by 1 when you add  an operator //Not sure if it should be here or inside funct
-    //cout << blankIndex << endl; //test
     //cout << "OPERATORS CALLED " << endl;
     
     //moveUP is allowed 
-    
     if (blankIndex > 2) {
-        //t = p; 
         //cout << "CAN MOVE UP, CALL APPROPRIATE MOVE FUNC" << endl;
         numOfNodes++; //increment if this operator is valid
-        //this->depth++;   //increment the depth by 1 when you add  an operator 
         //MIGHT NEED SOMETHING TO HANDLE IF USING A HUERSITC OR NOT 
-        //ExpandedOperatorProbs.push(t);
 
         //originally was p.up?
         //Sets the child to be a new prob ...
         //cout << "Before pointer " << endl; 
         p.up = new Problem(p.inputPuzzle, p.depth, p.hn);
 
-        
-
         // cout << "Makes a child pointer" << endl;
-        //p.up->setPuzzle(p.inputPuzzle);
         //cout << "sets up that child's puzzle" << endl;
 
         p.up->setPuzzle(p.up->moveUp());            //This statement is what's causing the crash
+
         //cout << "Successfully made set the puzzle of the child to the operated one" << endl;
+
+        if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
+           // cout << "MISMATCHED ENTERED" << endl;           //TEST
+            p.up->setHn(p.up->mismatchedHueristic());
+        }
+        
+
         ExpandedOperatorProbs.push( *(p.up) );
         //cout << "Pushed thsi child onto a queue" << endl;
     }
@@ -128,12 +133,19 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
 
     // moveDown allowed
     if (blankIndex < 6) {
-        
         //cout << "CAN MOVE down, CALL APPROPRIATE MOVE FUNC" << endl;
         numOfNodes++; //increment if this operator is valid
+
         //Sets the child to be a new prob ... 
         p.down = new Problem(p.inputPuzzle, p.depth, p.hn);
         p.down->setPuzzle(p.down->moveDown());
+
+
+        if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
+            p.down->setHn(p.down->mismatchedHueristic());
+           //cout << "There are " << p.down->mismatchedHueristic() << " mismatches for DOWN" << endl;    //TEST
+        }
+    
         ExpandedOperatorProbs.push( *(p.down) );
     }
 
@@ -146,6 +158,14 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
         //Sets the child to be a new prob ... 
         p.left = new Problem(p.inputPuzzle, p.depth, p.hn);   //Child pointer points to child node 
         p.left->setPuzzle(p.left->moveLeft());            //set the puzzle of the child to the puzzle after doing Op 
+
+
+    
+        if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
+            p.left->setHn(p.left->mismatchedHueristic());
+            //cout << "There are " << p.left->mismatchedHueristic() << " mismatches for LEFT" << endl;    //TEST
+        }
+
         ExpandedOperatorProbs.push(*(p.left));             //enqueue this Problem* to a queue
     }
 
@@ -158,6 +178,15 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
         //Sets the child to be a new prob ... 
         p.right = new Problem(p.inputPuzzle, p.depth, p.hn); //Child pointer points to child node 
         p.right->setPuzzle(p.right->moveRight());            //set the puzzle of the child to the puzzle after doing Op 
+
+
+    
+        if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
+            p.right->setHn(p.right->mismatchedHueristic());
+
+            //cout << "There are " << p.right->mismatchedHueristic() << " mismatches for RIGHT" << endl;    //TEST
+        }
+    
         ExpandedOperatorProbs.push(*(p.right));             //enqueue this Problem* to a queue
     }
     return;
@@ -175,7 +204,7 @@ vector<int> Problem::moveUp() {  //orignally all had a parameter Problem
     //(oringally did - 1 to everything)
     iter_swap(tempP1.begin() +zeroIndex, tempP1.begin() +zeroIndex- 3); //swaps the elements 
 
-    return tempP1;  //I think tempP1 is the one I'm supposed to return...
+    return tempP1;  
 }
 
 vector<int> Problem::moveDown() {
@@ -204,12 +233,11 @@ vector<int> Problem::moveRight() {
 
 
 //returns index for blank character
-int Problem::getBlankIndex() { //(Problem& prob) {           //originally prob...
+int Problem::getBlankIndex() { 
     int index = 0;  
 
     for (int i = 0; i < inputPuzzle.size(); i++) {
         if (inputPuzzle.at(i) == 0) { 
-            //cout << "recognized that " << i << " is the BlankIndex" << endl; //test
             index = i;
         }
     }
@@ -218,9 +246,7 @@ int Problem::getBlankIndex() { //(Problem& prob) {           //originally prob..
 
 
 //Test's if this problem is the goal state
-bool Problem::goalTest() {  //orignally Problem& prob)
-    //cout << "goalTest called" << endl;
-
+bool Problem::goalTest() {  
     for (int i = 0; i < inputPuzzle.size(); i++) {
         if (inputPuzzle.at(i) != goalState.at(i)) {        //If any element does not equal the goal state, then false
             return false;
@@ -241,9 +267,25 @@ void Problem::printResults () {
 }
 
 
-//Queue stuff
+//Returns the number given by the mismatched heuristic 
+int Problem::mismatchedHueristic() {
+    int mismatches = 0; 
 
-//queue<Problem> ExpandedOperatorProbs;   //used for Operator class to store expanded problems 
+    for (int i = 0; i < this->inputPuzzle.size(); i++) {   
+
+       if (this->inputPuzzle.at(i) == 0) {
+            //if blank is selected, don't count it 
+       }
+       else if (this->inputPuzzle.at(i) != this->goalState.at(i)) {
+           mismatches++;
+       }
+   }
+
+    return mismatches;
+}
+ 
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //General search  Returns if the soln was found or not 
 //int PauseProgram;   //Use a cin to stop execution FOR TESTING PURPOSES
@@ -254,20 +296,10 @@ void generalSearch (Problem& p) {
     PriorityQ.push(p);
 
 
-    //TESTING out 2 elemeents in the queue
-    //vector<int> p2 = {1, 2, 3, 4, 5, 6, 7, 8, 0};
-    //vector<int> p3 = {1, 2, 3, 4, 0, 8, 7, 6, 5};
-    //Problem prob2(p2, 0, 1);
-    //PriorityQ.push(prob2);
-
-    // END OF TEST
-
-
     maxNumInQueue = PriorityQ.size();    //set inital max 
     
-    Problem temp;   //creates a temp problem, used to represent the top of the queue n stuff 
-
-    Problem tempForInput;           //Creates a temporary problem that is then set to equal temp, used to pass in values to Operator
+    Problem temp;                   //creates a temp problem, used to represent the top of the queue n stuff 
+    //Problem tempForInput;           //Creates a temporary problem that is then set to equal temp, used to pass in values to Operator
 
 
     //cout << "PRIORITYQ SIZE IS: " << PriorityQ.size() << endl;
@@ -290,7 +322,6 @@ void generalSearch (Problem& p) {
 
         temp.printResults();   //Not sure if I should put this here 
 
-        //cout << "Help " << endl;
         
         //If the goal is reached, then return success
         if (temp.goalTest()) {
@@ -306,18 +337,12 @@ void generalSearch (Problem& p) {
 
         //Next, expand operators into the queue
         temp.operators(tempForInput);
-        //numOfNodes++;       //increment num of nodes
-
         //delete tempForInput;    //maybe delete it?
 
-
-        //cout << "ME" << endl;
-
-        cout << "The size of Operators Queue is: " << ExpandedOperatorProbs.size() << endl;     //TEST
+        //cout << "The size of Operators Queue is: " << ExpandedOperatorProbs.size() << endl;     //TEST
 
 
         //Next, add the expanded operators (if any) to the Priority Queue until the expanded operator queue is empty
-        //for (int i = 0; i < ExpandedOperatorProbs.size(); i++) {
         //Should skip if empty
         while(!ExpandedOperatorProbs.empty()) {
             PriorityQ.push( ExpandedOperatorProbs.top() );         //orignally was .front() cause EOP was a regular queue
@@ -331,8 +356,11 @@ void generalSearch (Problem& p) {
             maxNumInQueue = PriorityQ.size();
         }
 
-        //cin >> PauseProgram; //FOR TESTING
-
+    /*
+        cout << "Paused, give input: ";
+        cin >> PauseProgram; //FOR TESTING
+        cout << endl;
+    */
     }
 
     //cout << "exited loop" << endl;
@@ -413,12 +441,14 @@ int main() {
 
         if (sortingAgorithm == 1 ) { //h(n) = 0
             Problem prob(initalProblem, 0, 0);
-            cout << "UNIFORM COST SEARCH" << endl;
-            generalSearch(prob);           //TESTING
+            cout << "UNIFORM COST SEARCH" << endl;      //comment out later 
+            generalSearch(prob);          
             
         }
-        else if (sortingAgorithm == 2) {
-             cout << "MISPLACED TILE" << endl;
+        else if (sortingAgorithm == 2) {        //h(n) = the mismatched heruistic
+            Problem prob(initalProblem, 0, 0);
+            cout << "MISPLACED TILE" << endl;
+            generalSearch(prob);
         }
         else if (sortingAgorithm == 3) {
             cout << "MANHATTAN DISTANCE" << endl;
@@ -427,26 +457,6 @@ int main() {
             cout << "Please pick a valid input" << endl;
         }
     }    
-
-    //cout << "reached end of program" << endl;
-
-
-    //Testing out 2d arrays, maybe could use this for mismatched heuristic 
-    int mismatches = 0; 
-    /*
-    //can make the '3' just an n value
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-
-            if (testPuzzle[i][j] == '0') {                              //|| (goalState[i][j] != '0')} 
-                   //if the empty character is selected, don't count it 
-            }
-            else if (testPuzzle[i][j] != goalState[i][j] ) { //else If there is a mismatch, count it  
-                mismatches++; 
-            }  
-        }
-    }            
-    cout << "The number of mismatches is: " << mismatches << endl;        
-    */
+    //cout << "reached end of program" << endl;   
     return 0; 
 }

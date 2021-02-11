@@ -48,10 +48,14 @@ class Problem {
         //Methods
         //Sets inputPuzzle
         void setPuzzle(vector<int> puz);          //originally by reference?
+        void setHn(int hn_);                
 
 
         //Adds all possible operators to the ExpandedOperatorProbs to then be added to priority queue based off of their costs 
         void operators(Problem& p); 
+
+
+        int mismatchedHueristic(); 
 
 
         //Actually moving them 
