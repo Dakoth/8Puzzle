@@ -197,8 +197,7 @@ vector<int> Problem::moveLeft() {
 vector<int> Problem::moveRight() {
     vector<int> tempP1 = this->inputPuzzle;
     int zeroIndex = getBlankIndex();
-    iter_swap(tempP1.begin() +zeroIndex, tempP1.begin() +zeroIndex+ 1); //swaps the elements 
-
+    iter_swap(tempP1.begin() +zeroIndex, tempP1.begin() +zeroIndex+ 1); //swaps the element
     return tempP1;
 }
 
