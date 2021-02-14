@@ -127,6 +127,7 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
             p.up->setHn(p.up->mismatchedHueristic());
         }
         else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+            cout << "UP: ";
             p.up->setHn(p.up->manhattanDistance());
         }
         
@@ -151,6 +152,7 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
            //cout << "There are " << p.down->mismatchedHueristic() << " mismatches for DOWN" << endl;    //TEST
         }
         else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+            cout << "DOWN: ";
             p.down->setHn(p.down->manhattanDistance());
         }
     
@@ -174,6 +176,7 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
             //cout << "There are " << p.left->mismatchedHueristic() << " mismatches for LEFT" << endl;    //TEST
         }
         else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+            cout << "LEFT";
             p.left->setHn(p.left->manhattanDistance());
         }
 
@@ -196,6 +199,7 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
             p.right->setHn(p.right->mismatchedHueristic());
         }
         else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+            cout << "RIGHT";
             p.right->setHn(p.right->manhattanDistance());
         }
     
@@ -300,7 +304,7 @@ int Problem::manhattanDistance() {
     int manCount = 0;   //manhatt distance count 
 
 
-    //Notice that the Goal state just has each elemnt in a strictly inceasing fashion (besides blank), we can take advantage of this 
+    //Notice that the Goal state just has each element in a strictly inceasing fashion (besides blank), we can take advantage of this 
     //in order to determine the manhattan distance between the input and the goal state;
 
     int goalRow;    //Both of these indicate the row and column of the corresponding element in the goal state. 
@@ -314,13 +318,16 @@ int Problem::manhattanDistance() {
     int difference = 0; //Difference between input and goal state  
 
 
-    for (int i = 0; i < this->inputPuzzle.size(); i++) {  
-        if ( (this->inputPuzzle.at(i) == 0) || (this->inputPuzzle.at(i) == this->goalState.at(i)) ) {
+    for (int i = 0; i < this->inputPuzzle.size(); i++) { 
+            //Doesn't care if the blank char is in the right place 
+            //originally inputPuzzle.at(i) 
+        if ( (this->goalState.at(i) == 0) || (this->inputPuzzle.at(i) == this->goalState.at(i)) ) {
             //If blank is selected or both same element, do nothing
         }
         else {  //else not equal and not a blank state 
-            goalRow = (i - 1) / 3;      //Gets the row of this element in the goal state
-            goalCol = (i - 1) % 3;      //Gets the col of this element in the GOAL STATE
+                    //originally i - 1
+            goalRow = i / 3;      //Gets the row of this element in the goal state
+            goalCol = i % 3;      //Gets the col of this element in the GOAL STATE
 
             indexOfIncorrectTile = getIndexOfInputElement(goalState.at(i));  //Gets the index of the desired element in input puzzle
             inputRow = indexOfIncorrectTile / 3;
@@ -331,12 +338,15 @@ int Problem::manhattanDistance() {
             manCount += difference; //Adds this difference to the Manhattan cost 
         }
     }
+    
+    //cout << "The manhattan distance of this puzzle is: " << manCount << endl;       //TEST
 
     return manCount;
 } 
 
 //Helper function for Manhattan 
 int Problem::getIndexOfInputElement(int element){   //Takes in the desired element to look for 
+    //cout << "looking for: " << element << endl; //TEST
     int index; 
 
     for (int i = 0; i < this->inputPuzzle.size(); i++) { 
@@ -344,41 +354,32 @@ int Problem::getIndexOfInputElement(int element){   //Takes in the desired eleme
             index = i;
         }
     }
+    //cout << "index for misplaced manhattan is " << index << endl;
     return index; 
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //General search  Returns if the soln was found or not 
-//int PauseProgram;   //Use a cin to stop execution FOR TESTING PURPOSES
+char PauseProgram;   //Use a cin to stop execution FOR TESTING PURPOSES
 
 void generalSearch (Problem& p) { 
-    //cout << "yuh" << endl;      // endl;
 
     PriorityQ.push(p);
-
-
     maxNumInQueue = PriorityQ.size();    //set inital max 
     
     Problem temp;                   //creates a temp problem, used to represent the top of the queue n stuff 
-    //Problem tempForInput;           //Creates a temporary problem that is then set to equal temp, used to pass in values to Operator
-
-
-    //cout << "PRIORITYQ SIZE IS: " << PriorityQ.size() << endl;
-
+   
     //While the queue is not empty 
     while (PriorityQ.size() >= 0 )  {         //orignally !PriorityQ.empty()
-        //cout << "in while loop" << endl;
-        Problem tempForInput; 
+        Problem tempForInput;        //Creates a temporary problem that is then set to equal temp, used to pass in values to Operator
 
         temp = PriorityQ.top();     //makes temp the top element of the priority queue
-        
-        //tempForInput = new Problem(temp.inputPuzzle, temp.depth, temp.hn);       //Used for when we pass into Operator()
         tempForInput = temp;
         
         if (PriorityQ.empty()) {
             cout << "FAILURE" << endl;
-            return;       //if the queue becomes empty, report failure
+            return;             //if the queue becomes empty, report failure
         }
 
 
@@ -407,12 +408,10 @@ void generalSearch (Problem& p) {
         //Next, add the expanded operators (if any) to the Priority Queue until the expanded operator queue is empty
         //Should skip if empty
         while(!ExpandedOperatorProbs.empty()) {
-            PriorityQ.push( ExpandedOperatorProbs.top() );         //orignally was .front() cause EOP was a regular queue
+            PriorityQ.push( ExpandedOperatorProbs.top() );         
             ExpandedOperatorProbs.pop();
         }
        
-        //This should? ^^^^^^^^ push the correct Operator to the array????
-
         //Update max num of nodes in queue if need be
         if (maxNumInQueue < PriorityQ.size() ) {
             maxNumInQueue = PriorityQ.size();
@@ -423,10 +422,8 @@ void generalSearch (Problem& p) {
         cin >> PauseProgram; //FOR TESTING
         cout << endl;
     */
-    }
 
-    //cout << "exited loop" << endl;
-    //assume it returns 
+    }
     return;
 };
 
@@ -453,7 +450,6 @@ int main() {
 
         if (user == '1' ) { //default puzzle 
             initalProblem = defaultProb;
-            //prob.setPuzzle(problem); //sets the inital problem puzzle to be the input
         }
         else if (user == '2') { //If not the default
             cout << "Enter your puzzle, use a zero to represent the blank" << endl;
@@ -461,16 +457,15 @@ int main() {
 
             getline(cin, userPuzzle);
             userPuzzleConcat += userPuzzle + " ";
-            //cout << userPuzzleConcat << endl;// test
 
             cout << "Enter the second row, use space or tabs between numbers" << endl;
             getline(cin, userPuzzle);
             userPuzzleConcat += userPuzzle + " ";
-            //cout << userPuzzleConcat << endl;// test
 
             cout << "Enter the third row, use space or tabs between numbers" << endl;
             getline(cin, userPuzzle);
             userPuzzleConcat += userPuzzle;
+
 
             //testing putting the streamstring in thingy 
             stringstream ss(userPuzzleConcat);
@@ -490,7 +485,6 @@ int main() {
 
     
     //Second part 
-    //user = '\0';
     sortingAgorithm = 0;
     cout << "Enter your choice of algorithm" << endl;
     cout << "1. Uniform Cost Search" << endl;
@@ -503,7 +497,7 @@ int main() {
 
         if (sortingAgorithm == 1 || sortingAgorithm == 2 || sortingAgorithm == 3) { //h(n) = 0
             Problem prob(initalProblem, 0, 0);
-            //cout << "UNIFORM COST SEARCH" << endl;      //comment out later 
+
             generalSearch(prob);          
             
         }
