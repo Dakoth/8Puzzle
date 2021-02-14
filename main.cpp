@@ -4,10 +4,10 @@
 #include <vector> 
 
 #include <stdlib.h> //for abs 
-
 #include <sstream>  //For taking in input 
-
 #include <algorithm> //For swapping values in puzzle
+
+#include <chrono>   //For getting execution time 
 
 #include "Problem.h"
 
@@ -27,45 +27,11 @@ class minHeapComp {
 };
 
 priority_queue< Problem, vector<Problem>, minHeapComp > PriorityQ;   //Generates a min heap 
-
-//Not sure if this should be a queue or PrioQ
 priority_queue< Problem, vector<Problem>, minHeapComp > ExpandedOperatorProbs; //used for Operator class to store expanded problems 
-//queue<Problem> ExpandedOperatorProbs;    
+  
 
 
-
-///////////////////////////////////////////////////
-//NODE CLASSES
-
-/* Orignal Node class
-class Node {
-    public: 
-        int depth; //depth of a node 
-        int gn; 
-        int hn;   
-    
-        //Node* child;
-        //Node* ; 
-        
-        //Methods
-        
-        void set_gn(int gn_) { this->gn = gn_;};
-        int get_gn() { return this->gn; };
-
-        void set_hn(int hn_) { this->hn = hn_;};
-        int get_hn() { return this-> hn; };
-
-        void set_depth(int depth_) {this->depth = depth_;};
-        int get_depth() { return this-> depth; };
-        
-        //vector<Node*>child; 
-        //COnstructors
-        Node() { this->depth = 0; this->gn = 0; this->hn = 0; }; //default constructor
-        Node(int depth, int gn, int hn) {this->depth = depth; this->gn = gn; this->hn = hn; } //other constructor
-};
-*/
-
-
+///////////////////////////////////
 //Problem definitions 
 
 //Constructors    // might need more constructors 
@@ -101,45 +67,31 @@ void Problem::setHn(int hn_) {this->hn = hn_;}
 void Problem::operators(Problem& p){       //might need to have a Prob as an input 
     int blankIndex = getBlankIndex();
 
-    p.depth++;   //increment the depth by 1 when you add  an operator //Not sure if it should be here or inside funct
-    //cout << "OPERATORS CALLED " << endl;
+    p.depth++;   //increment the depth by 1 when you add  an operator 
     
     //moveUP is allowed 
     if (blankIndex > 2) {
-        //cout << "CAN MOVE UP, CALL APPROPRIATE MOVE FUNC" << endl;
         numOfNodes++; //increment if this operator is valid
-        //MIGHT NEED SOMETHING TO HANDLE IF USING A HUERSITC OR NOT 
-
-        //originally was p.up?
-        //Sets the child to be a new prob ...
-        //cout << "Before pointer " << endl; 
+        
         p.up = new Problem(p.inputPuzzle, p.depth, p.hn);
 
-        // cout << "Makes a child pointer" << endl;
-        //cout << "sets up that child's puzzle" << endl;
-
         p.up->setPuzzle(p.up->moveUp());            //This statement is what's causing the crash
-
-        //cout << "Successfully made set the puzzle of the child to the operated one" << endl;
 
         if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
            // cout << "MISMATCHED ENTERED" << endl;           //TEST
             p.up->setHn(p.up->mismatchedHueristic());
         }
         else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
-            cout << "UP: ";
             p.up->setHn(p.up->manhattanDistance());
         }
         
 
         ExpandedOperatorProbs.push( *(p.up) );
-        //cout << "Pushed thsi child onto a queue" << endl;
     }
 
 
     // moveDown allowed
     if (blankIndex < 6) {
-        //cout << "CAN MOVE down, CALL APPROPRIATE MOVE FUNC" << endl;
         numOfNodes++; //increment if this operator is valid
 
         //Sets the child to be a new prob ... 
@@ -149,10 +101,8 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
 
         if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
             p.down->setHn(p.down->mismatchedHueristic());
-           //cout << "There are " << p.down->mismatchedHueristic() << " mismatches for DOWN" << endl;    //TEST
         }
         else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
-            cout << "DOWN: ";
             p.down->setHn(p.down->manhattanDistance());
         }
     
@@ -162,25 +112,22 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
 
     //move left 
     if ( (blankIndex % 3) > 0 ) {
-        //cout << "CAN MOVE left, CALL APPROPRIATE MOVE FUNC" << endl;
-
         numOfNodes++; //increment if this operator is valid
-        //Sets the child to be a new prob ... 
-        p.left = new Problem(p.inputPuzzle, p.depth, p.hn);   //Child pointer points to child node 
-        p.left->setPuzzle(p.left->moveLeft());            //set the puzzle of the child to the puzzle after doing Op 
+                                            //Sets the child to be a new prob ... 
+        p.left = new Problem(p.inputPuzzle, p.depth, p.hn);         //Child pointer points to child node 
+        p.left->setPuzzle(p.left->moveLeft());                  //set the puzzle of the child to the puzzle after doing Op 
 
 
     
-        if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
+        if (sortingAgorithm == 2) {                             //If mismatched heuristic is chosen, apply it 
             p.left->setHn(p.left->mismatchedHueristic());
-            //cout << "There are " << p.left->mismatchedHueristic() << " mismatches for LEFT" << endl;    //TEST
         }
-        else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+        else if (sortingAgorithm == 3) {                        //else do manhattan if a 3 
             cout << "LEFT";
             p.left->setHn(p.left->manhattanDistance());
         }
 
-        ExpandedOperatorProbs.push(*(p.left));             //enqueue this Problem* to a queue
+        ExpandedOperatorProbs.push(*(p.left));                  //enqueue this Problem* to a queue
     }
 
     
@@ -190,16 +137,15 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
         numOfNodes++; //increment if this operator is valid
 
         //Sets the child to be a new prob ... 
-        p.right = new Problem(p.inputPuzzle, p.depth, p.hn); //Child pointer points to child node 
-        p.right->setPuzzle(p.right->moveRight());            //set the puzzle of the child to the puzzle after doing Op 
+        p.right = new Problem(p.inputPuzzle, p.depth, p.hn);        //Child pointer points to child node 
+        p.right->setPuzzle(p.right->moveRight());                   //set the puzzle of the child to the puzzle after doing Op 
 
 
     
-        if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
+        if (sortingAgorithm == 2) {                                 //If mismatched heuristic is chosen, apply it 
             p.right->setHn(p.right->mismatchedHueristic());
         }
-        else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
-            cout << "RIGHT";
+        else if (sortingAgorithm == 3) {                            //else do manhattan if a 3 
             p.right->setHn(p.right->manhattanDistance());
         }
     
@@ -213,7 +159,6 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
 //Because of the constraints given in Operator class, this SHOULD not lead to any issues of swapping an element 
 vector<int> Problem::moveUp() {  //orignally all had a parameter Problem
     vector<int> tempP1 = this->inputPuzzle;
-    //vector<int> tempP2 = this->inputPuzzle;
     int zeroIndex = getBlankIndex();
 
 
@@ -268,7 +213,7 @@ bool Problem::goalTest() {
             return false;
         }
     }
-    return true;    //Means that this puzzle is the goal state, return true
+    return true;                //Means that this puzzle is the goal state, return true
 }
 
 
@@ -296,13 +241,11 @@ int Problem::mismatchedHueristic() {
            mismatches++;
        }
    }
-
     return mismatches;
 }
  
 int Problem::manhattanDistance() {
     int manCount = 0;   //manhatt distance count 
-
 
     //Notice that the Goal state just has each element in a strictly inceasing fashion (besides blank), we can take advantage of this 
     //in order to determine the manhattan distance between the input and the goal state;
@@ -339,14 +282,12 @@ int Problem::manhattanDistance() {
         }
     }
     
-    //cout << "The manhattan distance of this puzzle is: " << manCount << endl;       //TEST
-
     return manCount;
 } 
 
 //Helper function for Manhattan 
-int Problem::getIndexOfInputElement(int element){   //Takes in the desired element to look for 
-    //cout << "looking for: " << element << endl; //TEST
+//Takes in the desired element to look for 
+int Problem::getIndexOfInputElement(int element){   
     int index; 
 
     for (int i = 0; i < this->inputPuzzle.size(); i++) { 
@@ -354,14 +295,13 @@ int Problem::getIndexOfInputElement(int element){   //Takes in the desired eleme
             index = i;
         }
     }
-    //cout << "index for misplaced manhattan is " << index << endl;
     return index; 
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //General search  Returns if the soln was found or not 
-char PauseProgram;   //Use a cin to stop execution FOR TESTING PURPOSES
+//char PauseProgram;   //Use a cin to stop execution FOR TESTING PURPOSES
 
 void generalSearch (Problem& p) { 
 
@@ -383,7 +323,7 @@ void generalSearch (Problem& p) {
         }
 
 
-        temp.printResults();   //Not sure if I should put this here 
+        temp.printResults();   
 
         
         //If the goal is reached, then return success
@@ -483,6 +423,9 @@ int main() {
         }
     }   
 
+
+    //Timer stuff
+    chrono::time_point<chrono::system_clock> start, end; 
     
     //Second part 
     sortingAgorithm = 0;
@@ -498,25 +441,19 @@ int main() {
         if (sortingAgorithm == 1 || sortingAgorithm == 2 || sortingAgorithm == 3) { //h(n) = 0
             Problem prob(initalProblem, 0, 0);
 
-            generalSearch(prob);          
-            
+            cout << "Expanding state: " << endl;
+
+            start = chrono::system_clock::now();
+            generalSearch(prob);  
+            end = chrono::system_clock::now();     
         }
-        /*
-        else if (sortingAgorithm == 2) {        //h(n) = the mismatched heruistic
-            Problem prob(initalProblem, 0, 0);
-            cout << "MISPLACED TILE" << endl;
-            generalSearch(prob);
-        }
-        else if (sortingAgorithm == 3) {
-            Problem prob(initalProblem, 0, 0);
-            cout << "MANHATTAN DISTANCE" << endl;
-            generalSearch(prob);
-        }
-        */
         else {
             cout << "Please pick a valid input" << endl;
         }
     }    
-    //cout << "reached end of program" << endl;   
+
+    chrono::duration<double> elapsed_seconds = end - start;    
+    cout << "Elapsed time of algorithm is: " << elapsed_seconds.count() << " s" << endl;
+
     return 0; 
 }
