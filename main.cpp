@@ -3,6 +3,8 @@
 #include <queue>
 #include <vector> 
 
+#include <stdlib.h> //for abs 
+
 #include <sstream>  //For taking in input 
 
 #include <algorithm> //For swapping values in puzzle
@@ -124,6 +126,9 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
            // cout << "MISMATCHED ENTERED" << endl;           //TEST
             p.up->setHn(p.up->mismatchedHueristic());
         }
+        else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+            p.up->setHn(p.up->manhattanDistance());
+        }
         
 
         ExpandedOperatorProbs.push( *(p.up) );
@@ -145,6 +150,9 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
             p.down->setHn(p.down->mismatchedHueristic());
            //cout << "There are " << p.down->mismatchedHueristic() << " mismatches for DOWN" << endl;    //TEST
         }
+        else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+            p.down->setHn(p.down->manhattanDistance());
+        }
     
         ExpandedOperatorProbs.push( *(p.down) );
     }
@@ -165,6 +173,9 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
             p.left->setHn(p.left->mismatchedHueristic());
             //cout << "There are " << p.left->mismatchedHueristic() << " mismatches for LEFT" << endl;    //TEST
         }
+        else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+            p.left->setHn(p.left->manhattanDistance());
+        }
 
         ExpandedOperatorProbs.push(*(p.left));             //enqueue this Problem* to a queue
     }
@@ -183,8 +194,9 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
     
         if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
             p.right->setHn(p.right->mismatchedHueristic());
-
-            //cout << "There are " << p.right->mismatchedHueristic() << " mismatches for RIGHT" << endl;    //TEST
+        }
+        else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+            p.right->setHn(p.right->manhattanDistance());
         }
     
         ExpandedOperatorProbs.push(*(p.right));             //enqueue this Problem* to a queue
@@ -284,6 +296,56 @@ int Problem::mismatchedHueristic() {
     return mismatches;
 }
  
+int Problem::manhattanDistance() {
+    int manCount = 0;   //manhatt distance count 
+
+
+    //Notice that the Goal state just has each elemnt in a strictly inceasing fashion (besides blank), we can take advantage of this 
+    //in order to determine the manhattan distance between the input and the goal state;
+
+    int goalRow;    //Both of these indicate the row and column of the corresponding element in the goal state. 
+    int goalCol;
+
+    int inputRow;   //Indicate the row and column of where an element is in the input Puzzle
+    int inputCol;
+
+    int indexOfIncorrectTile; //Uses helper function to get the index of a tile that is misplaced
+
+    int difference = 0; //Difference between input and goal state  
+
+
+    for (int i = 0; i < this->inputPuzzle.size(); i++) {  
+        if ( (this->inputPuzzle.at(i) == 0) || (this->inputPuzzle.at(i) == this->goalState.at(i)) ) {
+            //If blank is selected or both same element, do nothing
+        }
+        else {  //else not equal and not a blank state 
+            goalRow = (i - 1) / 3;      //Gets the row of this element in the goal state
+            goalCol = (i - 1) % 3;      //Gets the col of this element in the GOAL STATE
+
+            indexOfIncorrectTile = getIndexOfInputElement(goalState.at(i));  //Gets the index of the desired element in input puzzle
+            inputRow = indexOfIncorrectTile / 3;
+            inputCol = indexOfIncorrectTile % 3; 
+
+            difference = abs(goalRow - inputRow) + abs(goalCol - inputCol);  //This difference is the num of spaces an element is displaced
+
+            manCount += difference; //Adds this difference to the Manhattan cost 
+        }
+    }
+
+    return manCount;
+} 
+
+//Helper function for Manhattan 
+int Problem::getIndexOfInputElement(int element){   //Takes in the desired element to look for 
+    int index; 
+
+    for (int i = 0; i < this->inputPuzzle.size(); i++) { 
+        if (inputPuzzle.at(i) == element) { 
+            index = i;
+        }
+    }
+    return index; 
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -439,20 +501,24 @@ int main() {
         cin >> sortingAgorithm; 
         cin.ignore(); 
 
-        if (sortingAgorithm == 1 ) { //h(n) = 0
+        if (sortingAgorithm == 1 || sortingAgorithm == 2 || sortingAgorithm == 3) { //h(n) = 0
             Problem prob(initalProblem, 0, 0);
-            cout << "UNIFORM COST SEARCH" << endl;      //comment out later 
+            //cout << "UNIFORM COST SEARCH" << endl;      //comment out later 
             generalSearch(prob);          
             
         }
+        /*
         else if (sortingAgorithm == 2) {        //h(n) = the mismatched heruistic
             Problem prob(initalProblem, 0, 0);
             cout << "MISPLACED TILE" << endl;
             generalSearch(prob);
         }
         else if (sortingAgorithm == 3) {
+            Problem prob(initalProblem, 0, 0);
             cout << "MANHATTAN DISTANCE" << endl;
+            generalSearch(prob);
         }
+        */
         else {
             cout << "Please pick a valid input" << endl;
         }

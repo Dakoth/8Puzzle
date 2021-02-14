@@ -55,7 +55,11 @@ class Problem {
         void operators(Problem& p); 
 
 
-        int mismatchedHueristic(); 
+        int mismatchedHueristic();  //returns mismatched heuristic of current node
+
+        int manhattanDistance();    //Returns the manhattan distance of the current node 
+            //Helper function for manhattan
+            int getIndexOfInputElement(int element); //Takes in the desired element to look for 
 
 
         //Actually moving them 
