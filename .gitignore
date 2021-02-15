@@ -1,9 +1,10 @@
 # Build and Release Folders
-8 puzzle programming assignment.code-workspace
+
 
 # Other files and folders
 tempCodeRunnerFile.cpp
-main.exe
+*code-workspace
+*.exe
 
 # Executables
 
