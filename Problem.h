@@ -19,6 +19,8 @@ class Problem {
         Problem* left = nullptr; 
         Problem* right = nullptr;
 
+        Problem* parent = nullptr; 
+
 
     public:
         //Data 

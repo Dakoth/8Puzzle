@@ -3,7 +3,6 @@
 #include <queue>
 #include <vector> 
 
-#include <stdlib.h> //for abs 
 #include <sstream>  //For taking in input 
 #include <algorithm> //For swapping values in puzzle
 
@@ -27,6 +26,7 @@ class minHeapComp {
 };
 
 priority_queue< Problem, vector<Problem>, minHeapComp > PriorityQ;   //Generates a min heap 
+
 priority_queue< Problem, vector<Problem>, minHeapComp > ExpandedOperatorProbs; //used for Operator class to store expanded problems 
   
 
@@ -71,85 +71,95 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
     
     //moveUP is allowed 
     if (blankIndex > 2) {
-        numOfNodes++; //increment if this operator is valid
+        //numOfNodes++; //increment if this operator is valid
         
         p.up = new Problem(p.inputPuzzle, p.depth, p.hn);
 
         p.up->setPuzzle(p.up->moveUp());            //This statement is what's causing the crash
 
-        if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
-           // cout << "MISMATCHED ENTERED" << endl;           //TEST
-            p.up->setHn(p.up->mismatchedHueristic());
-        }
-        else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
-            p.up->setHn(p.up->manhattanDistance());
-        }
+        //If the given operator is not the same as the parent puzzle, add it to the queue 
+        if (p.up->inputPuzzle != p.inputPuzzle) {
+            if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
+            // cout << "MISMATCHED ENTERED" << endl;           //TEST
+                p.up->setHn(p.up->mismatchedHueristic());
+            }
+            else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+                p.up->setHn(p.up->manhattanDistance());
+            }
         
-
-        ExpandedOperatorProbs.push( *(p.up) );
+            ExpandedOperatorProbs.push( *(p.up) );
+        }   
     }
 
 
     // moveDown allowed
     if (blankIndex < 6) {
-        numOfNodes++; //increment if this operator is valid
+        //numOfNodes++; //increment if this operator is valid
 
         //Sets the child to be a new prob ... 
         p.down = new Problem(p.inputPuzzle, p.depth, p.hn);
         p.down->setPuzzle(p.down->moveDown());
 
+        //If the given operator is not the same as the parent puzzle, add it to the queue 
+        if (p.down->inputPuzzle != p.inputPuzzle) {
+            if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
+                p.down->setHn(p.down->mismatchedHueristic());
+            }
+            else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
+                p.down->setHn(p.down->manhattanDistance());
+            }
 
-        if (sortingAgorithm == 2) {                 //If mismatched heuristic is chosen, apply it 
-            p.down->setHn(p.down->mismatchedHueristic());
-        }
-        else if (sortingAgorithm == 3) {            //else do manhattan if a 3 
-            p.down->setHn(p.down->manhattanDistance());
-        }
+        
     
-        ExpandedOperatorProbs.push( *(p.down) );
+            ExpandedOperatorProbs.push( *(p.down) );
+        }
     }
 
 
     //move left 
     if ( (blankIndex % 3) > 0 ) {
-        numOfNodes++; //increment if this operator is valid
+        //numOfNodes++; //increment if this operator is valid
                                             //Sets the child to be a new prob ... 
         p.left = new Problem(p.inputPuzzle, p.depth, p.hn);         //Child pointer points to child node 
         p.left->setPuzzle(p.left->moveLeft());                  //set the puzzle of the child to the puzzle after doing Op 
 
 
-    
-        if (sortingAgorithm == 2) {                             //If mismatched heuristic is chosen, apply it 
-            p.left->setHn(p.left->mismatchedHueristic());
-        }
-        else if (sortingAgorithm == 3) {                        //else do manhattan if a 3 
-            cout << "LEFT";
-            p.left->setHn(p.left->manhattanDistance());
-        }
+        //If the given child puzzle is not the same as the parent puzzle, add it to the queue 
+        if (p.left->inputPuzzle != p.inputPuzzle) {
+            if (sortingAgorithm == 2) {                             //If mismatched heuristic is chosen, apply it 
+                p.left->setHn(p.left->mismatchedHueristic());
+            }
+            else if (sortingAgorithm == 3) {                        //else do manhattan if a 3 
+                //cout << "LEFT";
+                p.left->setHn(p.left->manhattanDistance());
+            }
 
-        ExpandedOperatorProbs.push(*(p.left));                  //enqueue this Problem* to a queue
+            ExpandedOperatorProbs.push(*(p.left));                  //enqueue this Problem* to a queue
+        }
     }
 
     
     //move Right
     if ( (blankIndex % 3) < 2)  {
         //cout << "CAN MOVE RIGHT, CALL APPROPRIATE MOVE FUNC" << endl;
-        numOfNodes++; //increment if this operator is valid
+        //numOfNodes++; //increment if this operator is valid
 
         //Sets the child to be a new prob ... 
         p.right = new Problem(p.inputPuzzle, p.depth, p.hn);        //Child pointer points to child node 
         p.right->setPuzzle(p.right->moveRight());                   //set the puzzle of the child to the puzzle after doing Op 
 
 
-    
-        if (sortingAgorithm == 2) {                                 //If mismatched heuristic is chosen, apply it 
-            p.right->setHn(p.right->mismatchedHueristic());
+        //If the given child puzzle is not the same as the parent puzzle, add it to the queue 
+        if (p.right->inputPuzzle != p.inputPuzzle) {
+            if (sortingAgorithm == 2) {                                 //If mismatched heuristic is chosen, apply it 
+                p.right->setHn(p.right->mismatchedHueristic());
+            }
+            else if (sortingAgorithm == 3) {                            //else do manhattan if a 3 
+                p.right->setHn(p.right->manhattanDistance());
+            }
+        
+            ExpandedOperatorProbs.push(*(p.right));             //enqueue this Problem* to a queue
         }
-        else if (sortingAgorithm == 3) {                            //else do manhattan if a 3 
-            p.right->setHn(p.right->manhattanDistance());
-        }
-    
-        ExpandedOperatorProbs.push(*(p.right));             //enqueue this Problem* to a queue
     }
     return;
 }
@@ -340,6 +350,7 @@ void generalSearch (Problem& p) {
 
         //Next, expand operators into the queue
         temp.operators(tempForInput);
+        numOfNodes++;           //expand temp 
         //delete tempForInput;    //maybe delete it?
 
         //cout << "The size of Operators Queue is: " << ExpandedOperatorProbs.size() << endl;     //TEST
