@@ -27,8 +27,8 @@ class minHeapComp {
 
 priority_queue< Problem, vector<Problem>, minHeapComp > PriorityQ;   //Generates a min heap 
 
-priority_queue< Problem, vector<Problem>, minHeapComp > ExpandedOperatorProbs; //used for Operator class to store expanded problems 
-  
+//priority_queue< Problem, vector<Problem>, minHeapComp > ExpandedOperatorProbs; //used for Operator class to store expanded problems 
+ queue<Problem*>  ExpandedOperatorProbs;
 
 
 ///////////////////////////////////
@@ -87,7 +87,8 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
                 p.up->setHn(p.up->manhattanDistance());
             }
         
-            ExpandedOperatorProbs.push( *(p.up) );
+            //ExpandedOperatorProbs.push( *(p.up) );
+             ExpandedOperatorProbs.push( p.up );
         }   
     }
 
@@ -111,7 +112,8 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
 
         
     
-            ExpandedOperatorProbs.push( *(p.down) );
+            //ExpandedOperatorProbs.push( *(p.down) );
+            ExpandedOperatorProbs.push( p.down );
         }
     }
 
@@ -134,7 +136,8 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
                 p.left->setHn(p.left->manhattanDistance());
             }
 
-            ExpandedOperatorProbs.push(*(p.left));                  //enqueue this Problem* to a queue
+            //ExpandedOperatorProbs.push(*(p.left));                  //enqueue this Problem* to a queue
+            ExpandedOperatorProbs.push( p.left );
         }
     }
 
@@ -158,7 +161,8 @@ void Problem::operators(Problem& p){       //might need to have a Prob as an inp
                 p.right->setHn(p.right->manhattanDistance());
             }
         
-            ExpandedOperatorProbs.push(*(p.right));             //enqueue this Problem* to a queue
+            //ExpandedOperatorProbs.push(*(p.right));             //enqueue this Problem* to a queue
+             ExpandedOperatorProbs.push( p.right );
         }
     }
     return;
@@ -231,9 +235,9 @@ bool Problem::goalTest() {
 void Problem::printResults () {
     cout << endl;
     cout << "The best state to expand with a g(n) = " << this->depth << " and h(n) = " << this->hn << " is..." << endl;
-    cout << inputPuzzle.at(0) << " " << inputPuzzle.at(1) << " " << inputPuzzle.at(2) << endl;
-    cout << inputPuzzle.at(3) << " " << inputPuzzle.at(4) << " " << inputPuzzle.at(5) << endl;
-    cout << inputPuzzle.at(6) << " " << inputPuzzle.at(7) << " " << inputPuzzle.at(8) << endl;
+    cout << this->inputPuzzle.at(0) << " " << this->inputPuzzle.at(1) << " " << this->inputPuzzle.at(2) << endl;
+    cout << this->inputPuzzle.at(3) << " " << this->inputPuzzle.at(4) << " " << this->inputPuzzle.at(5) << endl;
+    cout << this->inputPuzzle.at(6) << " " << this->inputPuzzle.at(7) << " " << this->inputPuzzle.at(8) << endl;
     return;
 }
 
@@ -359,7 +363,8 @@ void generalSearch (Problem& p) {
         //Next, add the expanded operators (if any) to the Priority Queue until the expanded operator queue is empty
         //Should skip if empty
         while(!ExpandedOperatorProbs.empty()) {
-            PriorityQ.push( ExpandedOperatorProbs.top() );         
+            //PriorityQ.push( ExpandedOperatorProbs.top() );     
+            PriorityQ.push(  *(ExpandedOperatorProbs.front()) ); 
             ExpandedOperatorProbs.pop();
         }
        
@@ -404,18 +409,21 @@ int main() {
         }
         else if (user == '2') { //If not the default
             cout << "Enter your puzzle, use a zero to represent the blank" << endl;
-            cout << "Enter the first row, use space or tabs between numbers" << endl; 
+            cout << "Enter the first row, use space or tabs between numbers: "; //<< endl; 
 
             getline(cin, userPuzzle);
             userPuzzleConcat += userPuzzle + " ";
+            cout << endl;
 
-            cout << "Enter the second row, use space or tabs between numbers" << endl;
+            cout << "Enter the second row, use space or tabs between numbers: "; // << endl;
             getline(cin, userPuzzle);
             userPuzzleConcat += userPuzzle + " ";
+            cout << endl;
 
-            cout << "Enter the third row, use space or tabs between numbers" << endl;
+            cout << "Enter the third row, use space or tabs between numbers: ";  //<< endl;
             getline(cin, userPuzzle);
             userPuzzleConcat += userPuzzle;
+            cout << endl;
 
 
             //testing putting the streamstring in thingy 
@@ -464,7 +472,6 @@ int main() {
     }    
 
     chrono::duration<double> elapsed_seconds = end - start;    
-    cout << "Elapsed time of algorithm is: " << elapsed_seconds.count() << " s" << endl;
-
+    //cout << "Elapsed time of algorithm is: " << elapsed_seconds.count() << " s" << endl; FOR TESTING
     return 0; 
 }
